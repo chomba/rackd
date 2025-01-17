@@ -1,0 +1,4 @@
+[database]
+cmd = "/var/lib/rackd/cmd.db"
+query = "/var/lib/rackd/query.db"
+raft = "/var/lib/rackd/raft.db"

@@ -1,0 +1,4 @@
+[database]
+cmd = "/data/lab/rust/rackd/rackd/tmp/cmd.db"
+query = "/data/lab/rust/rackd/rackd/tmp/query.db"
+raft = "/data/lab/rust/rackd/rackd/tmp/raft.db"
