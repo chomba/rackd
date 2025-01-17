@@ -1,27 +1,23 @@
-[package]
-name = "border66"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+resolver = "2"
+members = ["rackd", "rackd-ebpf"]
+default-members = ["rackd"]
 
-[dependencies]
-async-trait = "0.1.83"
-futures = "0.3.30"
-include_dir = "0.7.4"
-lazy_static = "1.5.0"
-netlink-packet-route = "0.19.0"
-rtnetlink = "0.14.1"
-num_enum = "0.7.3"
-openraft = "0.9.17"
-regex = "1.10.6"
-rusqlite = { version = "0.32.1", features = ["bundled"] }
-semver = { version = "1.0.23", features = ["serde"] }
-serde = { version = "1.0.210", features = ["derive"] }
-serde_json = "1.0.128"
-serde_yaml = "0.9.34"
-text-colorizer = "1.0.0"
-thiserror = "1.0.64"
-tokio = { version = "1.40.0", features = ["full"] }
-tokio-util = "0.7.12"
-uuid = { version = "1.10.0", features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
-num-traits = "0.2.19"
+[workspace.dependencies]
+which = { version = "6.0.0", default-features = false }
+env_logger = { version = "0.11.5", default-features = false }
+aya = { version = "0.13.1", default-features = false }
+aya-build = { version = "0.1.2", default-features = false }
+aya-ebpf = { version = "0.1.1", default-features = false }
+aya-log = { version = "0.2.1", default-features = false }
+aya-log-ebpf = { version = "0.1.1", default-features = false }
+libc = { version = "0.2.159", default-features = false }
+log = { version = "0.4.22", default-features = false }
+anyhow = { version = "1", default-features = false }
+network-types = "0.0.7"
+macaddr = "1.0.1"
+dotenv = "0.15.0"
 
+[profile.release.package.rackd-ebpf]
+debug = 2
+codegen-units = 1
