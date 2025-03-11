@@ -11,16 +11,16 @@ CREATE TABLE IF NOT EXISTS event (
     data        TEXT        NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS isp (
+CREATE TABLE IF NOT EXISTS wan (
     seq             INTEGER     PRIMARY KEY,
     version         INTEGER     NOT NULL,
     id              TEXT        NOT NULL UNIQUE,
-    rank            INTEGER     NOT NULL UNIQUE,
+    rack            TEXT        NOT NULL,
+    trunk           INTEGER     NOT NULL,
+    vlan            INTEGER     NOT NULL,
+    conn            TEXT        NOT NULL,
     name            TEXT        NOT NULL,
-    link            INTEGER     NOT NULL UNIQUE,
-    link_name       TEXT        NOT NULL,
-    link_status     TEXT        NOT NULL,
-    prefix          TEXT        NOT NULL,
+    mac             TEXT        NOT NULL,
     deleted         INTEGER     NOT NULL DEFAULT 0
 );
 

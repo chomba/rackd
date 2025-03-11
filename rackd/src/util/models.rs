@@ -1,24 +1,36 @@
+use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::net::wan::models::WanEvent;
 
 #[derive(Debug, Clone)]
 pub struct Event {
-    // pub seq: u32,
     pub id: Id,
+    // pub seq: u32,
     pub stream_id: Id,
     pub data: EventData,
     pub version: u32
 }
 
 impl Event {
-    pub fn new(stream_id: Id, data: EventData) -> Self {
+    pub fn single(stream_id: Id, inner_event: EventData, current_version: u32) -> Self {
         Self {
             id: Id::new(),
             stream_id,
-            data,
-            version: u32::default() 
+            data: inner_event,
+            version: current_version + 1
         }
+    }
+
+    pub fn many<T>(stream_id: Id, inner_events: T, mut current_version: u32) -> Vec<Self>
+        where T: IntoIterator<Item = EventData> {
+        let mut events = Vec::new();
+        for e in inner_events {
+            let event = Self::single(stream_id, e, current_version);
+            current_version = event.version;
+            events.push(event);
+        }
+        events
     }
 }
 
@@ -85,6 +97,12 @@ impl Id {
 impl Default for Id {
     fn default() -> Self {
         Self(Uuid::nil())
+    }
+}
+
+impl Display for Id {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 

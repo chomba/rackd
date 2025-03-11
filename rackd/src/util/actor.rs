@@ -106,6 +106,7 @@ impl<M> Handle<M>  {
         receiver.await.expect("Actor has been killed - send()")
     }
 
+    // Don't call this method within async functions
     pub fn blocking_send<P>(&self, payload: P) -> Result<P::Ok, P::Err> where P: Payload, M: From<Msg<P>>  {
         let (sender, receiver) = oneshot::channel::<Result<P::Ok, P::Err>>();
         let msg  = Msg { payload, respond_to: sender };

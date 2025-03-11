@@ -1,4 +1,41 @@
+// Conect the rack's first node to your exisiting network
+// Access your node's console and install rackd
+// Then run: 
+// rack new lim15109 
+// yo'll be asked for:
+// Select trunk interface, enter a domain name, and a prefix
+// Optionally you can just pass the following CLI arguments
+// --trunk bond1 --domain chomba.org  --prefix 2001:4860:4860::/48
+// You'll then be presented with a success screen and will be asked
+// Note: The VLAN used for the rack's node network will always be 1919
+// to configure a host on that ipv6 network and then
+// access https://lim15109.chomba.org (which will resolve to )
+// the success screen will also include a token
+// then open rackd electron app click on add rack
 
+// on the initialization wizard you'll be asked whether:
+// you want to CREATE a new rack or JOIN an existing rack
+// Select CREATE a new rack and you'll be asked to provide the following details:
+// Interface, Nodes's IPv6 prefix, Public Key, Rack's name then hit CREATE
+// Upon creation SSH access to the rack's node is set up
+
+
+// Now move to the VLAN you entered (you'll neeed to connect to a port on your ToR switch connected to that VLAN)
+// Now open rackd-desktop client (electron app) and click on add rack
+// Then enter the rack's IPV6 Prefix and your Private key.
+// the GUI will take you to the rack's edit page
+
+// To discover the IP Addresses of another rack in the organization
+// the rack must first try to directly contact that rack through an ip address
+// on the GUA /48 block (if there's still a path to the node then it will work)
+// if there's no available path the node then use the node's name A record 
+// hopefully DynDNS updates wont take longer than (5 minutes)
+
+// Netfilter vs eBPF:https://www.reddit.com/r/networking/comments/1dxcrrx/difference_between_netfilter_and_ebpf/ 
+// SlackHQ Nebula uses github.com/vishvananda/netlink 
+// Read: https://github.com/slackhq/nebula/discussions/986
+
+// authentication: https://webauthn.guide/
 // rackd will orchestrate
 // kind (To run kubernetes nodes as containers) - Kubers
 // containerd (container runtime) with runc (shim) and runwasm
@@ -6,6 +43,28 @@
 // Routing Suite (https://github.com/holo-routing/holo) +  Systemd
 // Firewall rules built with EBPF(https://github.com/aya-rs/aya + bpfman)
 // WASM (wastime + runwasm)
+
+// Should each Rack know about all networks on each other rack within the Organization?
+// No, that'd require all racks to be in the same RAFT consensus domain which would require
+// at least 3 racks to be deployed within the organization
+// Here's how it should work:
+// Each rack is the source of truth for the networks within it.
+// Each rack should only know the address and name of each other rack in the same organization
+// Each rack will have its own Private ASN and its own IPv6 Address Space (e.g /56)
+// After installation you can either create a new organization with rack new
+// Or you can join an existing rack
+
+// P2P Connections over QUIC
+// https://github.com/n0-computer/iroh
+// https://developers.yubico.com/Passkeys/
+
+// Traffic tunneling over QUIC
+// https://www.f5.com/company/blog/quic-will-eat-the-internet
+// https://news.ycombinator.com/item?id=26838840
+//https://tailscale.com/blog/quic-udp-throughput
+
+// OOB Management network:
+// https://wiki.archlinux.org/title/USB/IP
 
 // Install BFPTools:
 // install linux-tools-common linux-tools-generic linux-tools-$(uname -r)
@@ -19,6 +78,75 @@
 // functions
 // storage
 
+// You start with a rack, configure its WAN, LANs and DNS
+// In order for 2 racks to form an organization they must each be using the same TLD (e.g chomba.org)
+// For example, let's image you have these 2 independent racks:
+
+// Rack #1: (LIM15109 - AS4200000001) 
+//  - *.lim15109.org.chomba.org => (CNAME) *.4200000001.org.chomba.org 
+//  - 4200000001.org.chomba.org => (A) 2a0f:85c1:083f:0100:: (This /128 GUA-Anycast is configured on all nodes in the rack)
+//  - wan1.4200000001.org.chomba.org => (A) ISP1 Public IP Address
+//  - wan2.4200000001.org.chomba.org => (A) ISP2 Public IP Address
+
+// Rack #2: (CRZ0302 - AS4200000002)
+//  - *.crz0302.org.chomba.org => (CNAME) *.4200000002.org.chomba.org
+//  - 4200000002.org.chomba.org => 2a0f:85c1:083f:0200:: (This /128 GUA-Anycast is configured on all nodes in the rack)
+//  - wan1.4200000002.org.chomba.org => ISP1 Public IP Address
+
+// From Rack #2 (any node on rack #2), we will join Rack #1 to create our 2-rack organization:
+// $ rack join 4200000001.org.chomba.org --token RACK1-TOKEN --org 2a0f:85c1:083f:ffff::/64
+// # Note how --org is used to specify the organization's network ID
+// # the --org option only needs to be specified when creating the org.
+
+// After rack2 joins rack1 the following will happen:
+// - org.chomba.org => 2a0f:85c1:083f:ffff::
+// both rack#1 and rack#2 will share the same ORG-TOKEN
+// rack1 will become the LEADER and rack2 will become the FOLLOWER
+// each rack will configure their wireguard links
+// Rack #1 will configure:
+// - wg1 over wan1 (2a0f:85c1:083f:ffff:FA56:EA01::1)
+// - wg2 over wan2 (2a0f:85c1:083f:ffff:FA56:EA01::2)
+// Rack #2 will configure:
+// - wg1 over wan1 (2a0f:85c1:083f:ffff:FA56:EA02::1)
+//   - peers: 
+
+
+// rack (ASN 4200000001 with prefix 2a0f:85c1:083f:0100/56 and named lim15109)
+//  *.lim15109.org.chomba.org / CNAME / *.asn4200000001.org.chomba.org 
+//  @.asn4200000001.org.chomba.org / A /  2a0f:85c1:083f:0100::0
+
+// wan1.asn4200000001.org.chomba.org / A / xxxx:...:xxxx
+// wan2.asn4200000001.org.chomba.org / A / xxxx:...:xxxx
+
+
+// On the first node that will be part of the local rack do:
+
+// # Create a 1-node rack with ASN 4200000001 prefix 2a0f:85c1:083f:0100/56 and t1 as the trunk 
+// $ rack new as4200000001 2a0f:85c1:083f:0100/56 t1 [--name lim15109] [--trunk t2 | --trunk t3]
+
+// The cmd will set the node as the master node in the rack
+// and will make sure lim15109.local and as4200000001.local resolve 
+// to the master node Link-Local Address via trunk t1
+// node1.lim15109.local and node1.as4200000001.local will also resolve to the node's LLA
+// It will also configure @rack..01::1/64 as the GUA on the node's link via Trunk1
+
+// To join another node to the rack, run the following cmd from the node to be added:
+// $ rack node join as4200000001 trunk1
+// Nodes use mDNS to resolve the the hostname to the rack's master node link-local ip address
+// Once the node joins the rack it will be assigned a node number (e.g node2)
+// then it will configure @rack..01::2/64 as the GUA on the node's link via trunk1
+// at this point both nodes will become part of the cluster and raft's replication logic
+// will be applied so that both nodes move in a lockstep
+// On this Mode the first node will always be the LEADER and the 2nd node will always be the FOLLOWER
+// And there will be no LEADER ELECTION Process running on the nodes, meaning that if the leader fails
+// then the system will become read-only and the follower will only reply to READ requests
+// You can issue a command to switch the LEADER/FOLLOWER Roles on a 2-node cluster
+// For instance, if you need to take down the current LEADER for maintanence then the rack
+// will become read-only until the LEADER is back up, but you can manually switch Roles before
+// taking down the current leader, so that the system is WRITABLE while one of the 2 nodes in the rack
+// is being serviced. Raft's Leader Election algorithm will only be engaged when there are more than 2
+// nodes in the cluster.
+// 
 
 // The "Elected" REST Gateway LEADER receives a command on one of its endpoints
 // It passes it onto the RAFT Actor which stores it as an UNCOMMITED Command in its LOG
@@ -72,7 +200,7 @@ use aya_log_ebpf::info;
 use aya::{maps::Array, programs::{Xdp, XdpFlags}};
 use aya_log::EbpfLogger;
 use log::{debug, warn};
-use rackd::actors::{self, system::ActorSystem};
+use rackd::{actors::{self, system::ActorSystem}, net::{shared::models::NetName, wan::cmd::Create}};
 use tokio::signal;
 use dotenv::dotenv;
 // Authentication:
@@ -82,12 +210,15 @@ use dotenv::dotenv;
 // Read more about SD-WAN:
 // https://packetpushers.net/blog/implementing-zero-trust-for-a-borderless-world/
 
+// WebMesh
+// https://webmeshproj.github.io/documentation/getting-started/
+
 #[tokio::main]
 async fn main() {
     dotenv().ok();    
     env_logger::init();
-
-    ActorSystem::run();
+    // ActorSystem::run();
+    
     // Pass configuration file as argument border66 -conf=/etc/border66/config
     // Run ApiActor
     match signal::ctrl_c().await {

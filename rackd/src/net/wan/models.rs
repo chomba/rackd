@@ -8,30 +8,32 @@ use crate::{net::shared::models::*, org::rack::models::RackId, util::models::Id}
 pub enum WanEvent {
     Created(Created),
     Renamed(Renamed),
-    MacSpoofed(MacSpoofed),
-    MacUnspoofed(MacUnspoofed),
+    MacSetToAuto(MacSetToAuto),
+    MacSetToSpoof(MacSetToSpoof),
     Ipv6SetToRA(Ipv6SetToRA),
     Ipv6SetToStatic(Ipv6SetToStatic),
-    Ipv6Disabled(Ipv6Disabled),
     Ipv4SetToDHCP(Ipv4SetToDHCP),
-    Ipv4SetToStatic(Ipv4SetToStatic),
-    Ipv4Disabled(Ipv4Disabled),
+    Ipv4SetToStatic(Ipv4SetToStatic)
+    // Ipv4Disabled(Ipv4Disabled),
 
     // DHCPv6 IA for Prefix Delegation
-    Dhcp6IAPDAdded { iaid: u32, prefix_hint: Ipv6Prefix, preferred_lt: u32, valid_lt: u32 },
-    Dhcp6IAPDPrefixHintUpdated { iaid: u32, prefix_hint: Ipv6Prefix },
-    Dhcp6IAPDPreferredLTUpdated { iaid: u32, preferred_lt: u32 },
-    Dhcp6IAPDValidLTUpdated { iaid: u32, valid_lt: u32 },
+    // Dhcp6IAPDAdded { iaid: u32, prefix_hint: Ipv6Prefix, preferred_lt: u32, valid_lt: u32 },
+    // Dhcp6IAPDPrefixHintUpdated { iaid: u32, prefix_hint: Ipv6Prefix },
+    // Dhcp6IAPDPreferredLTUpdated { iaid: u32, preferred_lt: u32 },
+    // Dhcp6IAPDValidLTUpdated { iaid: u32, valid_lt: u32 },
     // DHCPv6 IA for Non-temporary Address
-    Dhcp6IANAAdded { iaid: u32, preferred_lt: u32, valid_lt: u32 },
+    // Dhcp6IANAAdded { iaid: u32, preferred_lt: u32, valid_lt: u32 },
     // DHCPv6 DUID
-    Dhcp6DuidSwitchedToAutoEN,
-    Dhcp6DuidSwitchedToEN { pen: u16, id: u128 },
-    Dhcp6DuidSwitchedToAutoLL,
-    Dhcp6DuidSwitchedToLL { hw_type: u16, mac: MacAddr6 },
-    Dhcp6DuidSwitchedToAutoLLT,
-    Dhcp6DuidSwitchedToLLT { hw_type: u16, mac: MacAddr6, time: u32 },
-    Dhcp6DuidSwitchedToRaw { value: u128 },
+    // Dhcp6DuidSwitchedToAutoEN,
+    // Dhcp6DuidSwitchedToEN { pen: u16, id: u128 },
+    // Dhcp6DuidSwitchedToAutoLL,
+    // Dhcp6DuidSwitchedToLL { hw_type: u16, mac: MacAddr6 },
+    // Dhcp6DuidSwitchedToAutoLLT,
+    // Dhcp6DuidSwitchedToLLT { hw_type: u16, mac: MacAddr6, time: u32 },
+    // Dhcp6DuidSwitchedToRaw { value: u128 },
+
+
+
     // These 2 events should be processed by the Stats Collector and displayed by Graphana
 //     LinkWentUp { up: LinkUp }, 
 //     LinkWentDown { down: LinkDown },
@@ -55,17 +57,15 @@ pub struct Renamed {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct MacSpoofed {
+pub struct MacSetToSpoof {
     pub mac: MacAddr6
 }
 
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
-pub struct MacUnspoofed;
+pub struct MacSetToAuto;
 
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
-pub struct Ipv6SetToRA {
-    pub id: WanId
-}
+pub struct Ipv6SetToRA;
 
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub struct Ipv6SetToStatic {
@@ -74,24 +74,11 @@ pub struct Ipv6SetToStatic {
 }
 
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
-pub struct Ipv6Disabled {
-    pub id: WanId
-}
-
-#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
-pub struct Ipv4SetToDHCP {
-    pub id: WanId
-}
+pub struct Ipv4SetToDHCP;
 
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub struct Ipv4SetToStatic {
-    pub id: WanId,
     pub host: Ipv4Host
-}
-
-#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
-pub struct Ipv4Disabled {
-    pub id: WanId
 }
 
 pub type WanId = Id;
@@ -110,6 +97,18 @@ pub type WanId = Id;
 //         write!(f, "{}", self.0)
 //     }
 // }
+
+#[derive(Debug, Serialize, Deserialize, Copy, Clone, PartialEq, Eq)]
+pub enum WanMac {
+    Auto,
+    Spoof(MacAddr6)
+}
+
+impl Default for WanMac {
+    fn default() -> Self {
+        Self::Auto
+    }
+}
 
 #[derive(Debug)]
 pub struct ISPL2Conf {
@@ -163,11 +162,10 @@ pub struct IPoEConf {
     // ipv6_mtu
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub enum Ipv6Conf {
     FromRA,
-    Static(Ipv6Host),
-    Disabled
+    Static(Ipv6Host)
 }
 
 impl Default for Ipv6Conf {
@@ -176,7 +174,7 @@ impl Default for Ipv6Conf {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone, PartialEq, Eq)]
 pub struct Ipv6Host {
     pub addr: Ipv6HostAddr,
     pub gateway: Ipv6Addr
@@ -262,11 +260,10 @@ pub struct DuidLL {
     address: u128
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
 pub enum Ipv4Conf { 
     DHCP,
-    Static(Ipv4Host),
-    Disabled
+    Static(Ipv4Host)
 }
 
 impl Default for Ipv4Conf {
@@ -275,7 +272,7 @@ impl Default for Ipv4Conf {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone, PartialEq, Eq)]
 pub struct Ipv4Host {
     pub addr: Ipv4HostAddr,
     pub geteway: Ipv4Addr

@@ -1,9 +1,3 @@
-use std::any::type_name;
-
-use rusqlite::Transaction;
-
-use super::models::Event;
-
 pub trait OptionExt<T> {
     fn err_or<E>(self, err: E) -> Result<(), E>;
 }

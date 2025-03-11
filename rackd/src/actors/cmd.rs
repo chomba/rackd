@@ -1,6 +1,4 @@
-use log::error;
-use rusqlite::{Connection, Transaction};
-use crate::conf::settings;
+use rusqlite::Connection;
 use crate::net::wan::cmd::WanCmd;
 use crate::net::NetCmd;
 use crate::util::actor::{Actor, Process};
@@ -20,6 +18,30 @@ impl Actor for RackdCmdActor {
                     let _ = cmd.respond_to.send(response);
                 },
                 WanCmd::Rename(cmd) => {
+                    let response = cmd.payload.process(self);
+                    let _ = cmd.respond_to.send(response);
+                },
+                WanCmd::SetMacToSpoof(cmd) => {
+                    let response = cmd.payload.process(self);
+                    let _ = cmd.respond_to.send(response);
+                },
+                WanCmd::SetMacToAuto(cmd) => {
+                    let response = cmd.payload.process(self);
+                    let _ = cmd.respond_to.send(response);
+                },
+                WanCmd::SetIpv6ToStatic(cmd) => {
+                    let response = cmd.payload.process(self);
+                    let _ = cmd.respond_to.send(response);
+                },
+                WanCmd::SetIpv6ToRA(cmd) => {
+                    let response = cmd.payload.process(self);
+                    let _ = cmd.respond_to.send(response);
+                },
+                WanCmd::SetIpv4ToDHCP(cmd) => {
+                    let response = cmd.payload.process(self);
+                    let _ = cmd.respond_to.send(response);
+                },
+                WanCmd::SetIpv4ToStatic(cmd) => {
                     let response = cmd.payload.process(self);
                     let _ = cmd.respond_to.send(response);
                 }
@@ -100,14 +122,7 @@ pub enum RackdCmd {
 }
 
 impl RackdCmdActor {
-    pub fn new() -> Self {
-        let conn = match Connection::open(&settings().database.cmd) {
-            Ok(conn) => conn,
-            Err(_) => {
-                error!("Failed to Connect to CMD Database");
-                std::process::exit(-1)
-            } 
-        };
+    pub fn new(conn: Connection) -> Self {
         Self { conn }
     }
 }

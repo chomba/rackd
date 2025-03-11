@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["rackd", "rackd-ebpf"]
+members = ["rackd", "rackd-ebpf", "rackd-web"]
 default-members = ["rackd"]
 
 [workspace.dependencies]

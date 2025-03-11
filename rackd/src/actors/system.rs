@@ -1,6 +1,8 @@
+use log::error;
+use rusqlite::Connection;
 use semver::Version;
 use crate::{conf, util::actor::{Actor, AsyncActor, Handle}};
-use super::cmd::RackdCmdActor;
+use super::cmd::{RackdCmd, RackdCmdActor};
 use crate::db;
 
 // The API Actor (Handling REST/gRPC request) is going to front the
@@ -44,17 +46,25 @@ pub enum ActorStatus {
 
 
 
-pub struct ActorSystem;
+pub struct ActorSystem {
+    pub cmd: Handle<RackdCmd>
+}
 
 impl ActorSystem {
-    // might want to inject userActor data
-    pub fn run() {
+    pub fn mock() -> Self {
+        let conn = Connection::open_in_memory()
+            .map_err(|e| error!("Failed to open in-memory db: {}", e))
+            .unwrap();
+        Self::new(conn)
+    }
+
+    pub fn new(cmd_db: Connection) -> Self {
         // Run Db Migrations
-        let settings = conf::settings();
-        db::cmd::migrations::runner().run(&settings.database.cmd).expect("Failed to Run Migrations");
+        // let settings = conf::settings();
+        let conn = db::cmd::migrations::runner().run(cmd_db);
         // Spawn Actors
-        let cmd_actor = RackdCmdActor::new();
-        RackdCmdActor::spawn(cmd_actor);
+        let cmd_handle = RackdCmdActor::spawn(RackdCmdActor::new(conn));
+        Self { cmd: cmd_handle }
 
 
         // let (tx_app, rx_app) = mpsc::channel::<AppMessage>(10);

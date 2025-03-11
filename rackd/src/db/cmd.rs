@@ -1,8 +1,8 @@
 pub mod migrations;
 pub mod traits;
-
 use std::sync::OnceLock;
-use crate::{net::wan::query::views::Wan, util::db::Projectors};
+use crate::net::wan::query::views::Wan;
+use super::util::Projectors;
 
 pub fn projectors() -> &'static Projectors {
     static PROJECTORS: OnceLock<Projectors> = OnceLock::new();

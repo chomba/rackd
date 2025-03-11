@@ -1,7 +1,7 @@
 use std::sync::OnceLock;
 use include_dir::include_dir;
 use rusqlite::Transaction;
-use crate::util::db::{Migration, MigrationError, MigrationRunner};
+use crate::db::util::{Migration, MigrationError, MigrationRunner};
 
 pub fn runner() -> &'static MigrationRunner<'static> {
     static M: OnceLock<MigrationRunner> = OnceLock::new();
@@ -16,12 +16,12 @@ pub fn runner() -> &'static MigrationRunner<'static> {
     })
 }
 
-pub fn up_v0_1_0(tx: &Transaction) -> Result<(), MigrationError> {
-    Ok(())
+pub fn up_v0_1_0(tx: &Transaction) {
+    
 }
 
-pub fn up_v0_2_0(tx: &Transaction) -> Result<(), MigrationError> {
-    Ok(())
+pub fn up_v0_2_0(tx: &Transaction) {
+    
 }
 
 

@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Rackd UI</title>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Teachers:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="ui/index/styles.css">
+    </head>
+    <body>
+        <div class="app-wrapper">
+            <x-sidebar class="aside-wrapper"></x-sidebar>
+            <section class="topbar-wrapper">
+                <div class="topbar">
+                    <div class="search">
+                        <span class="material-symbols-outlined">search</span>
+                        <span class="placeholder">Search by name or IP address (Cmd + B)</span>
+                    </div>
+                    <div class="shortcuts">
+                        <div class="notifications material-symbols-outlined attention">chat</div>
+                        <div class="settings material-symbols-outlined">settings</div>
+                        <span class="sep"></span>
+                        <div class="user">
+                            <span class="avatar">
+                                <span class="initials">JC</span>
+                            </span>
+                            <span class="btn-options"></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="main-wrapper">
+                <main class="main"></main>
+                <div class="page-content hide" id="network-tab">
+                    <div class="page-section">
+                        <div class="title">Nodes</div>
+                        <div class="network-list">
+                            <div class="network-wrapper">
+                                <div class="network-icon material-symbols-outlined">graph_5</div>
+                                <div class="network-content">
+                                    <span class="network-name">Nodes-T1</span>
+                                    <span class="network-l2">trunk-1 VLAN 1919</span>
+                                    <div class="network-id">@rack..01::/64</div>
+                                </div>
+                                <div class="network-status ok material-symbols-outlined">check</div>
+                            </div>
+                            <div class="network-wrapper">
+                                <div class="network-icon material-symbols-outlined">graph_5</div>
+                                <div class="network-content">
+                                    <span class="network-name">Nodes-T2</span>
+                                    <span class="network-l2">trunk-2 VLAN 1919</span>
+                                    <div class="network-id">@rack..02::/64</div>
+                                </div>
+                                <div class="network-status warning material-symbols-outlined">priority_high</div>
+                            </div>
+                        </div>
+                        <div class="tooltip-wrapper">
+                            <div class="icon material-symbols-outlined">lightbulb</div>
+                            <p class="text">
+                                A Nodes network contains all nodes in the rack connected to a single ToR switch over VLAN 1919. 
+                                Each trunk should be connected to a different ToR Switch for redundancy. The alias   
+                                <strong>@rack</strong> represents the rack's IPv6 GUA prefix. Read more on the <a href="">knowledge page</a>.
+                            </p>
+                        </div>
+                        <div style="margin-top: 30px;">
+                            <button class="add-network">Add Trunk</button>
+                        </div>
+                    </div>
+                    <div class="page-section">
+                        <div class="title">Lans</div>
+                        <div class="tooltip-wrapper">
+                            <div class="icon material-symbols-outlined">lightbulb</div>
+                            <p class="text">
+                                An Overlay Network is a virtual/logical network decoupled from the
+                                physical topology of the underlying network giving you host mobility. 
+                                Overlay networks may span across multiple racks, clients can use the <a href="">leaprack's client</a> 
+                                to connect to an organization overlay network.
+                            </p>
+                        </div>
+                        <div style="margin-top: 30px;">
+                            <button class="add-network">Add Overlay</button>
+                        </div>
+                    </div>
+                    <div class="page-section">
+                        <div class="title">OOBM</div>
+                        <div class="network-list">
+                            <div class="network-wrapper">
+                                <div class="network-icon material-symbols-outlined">graph_5</div>
+                                <div class="network-content">
+                                    <span class="network-name">OOBM-T1</span>
+                                    <span class="network-l2">trunk-1 VLAN 2020</span>
+                                    <div class="network-id">FD00:0001::/64</div>
+                                </div>
+                                <div class="network-status ok material-symbols-outlined">check</div>
+                            </div>
+                            <div class="network-wrapper">
+                                <div class="network-icon material-symbols-outlined">graph_5</div>
+                                <div class="network-content">
+                                    <span class="network-name">OOBM-T2</span>
+                                    <span class="network-l2">trunk-2 VLAN 2020</span>
+                                    <div class="network-id">FD00:0002::/64</div>
+                                </div>
+                                <div class="network-status warning material-symbols-outlined">priority_high</div>
+                            </div>
+                        </div>
+                        <div class="tooltip-wrapper">
+                            <div class="icon material-symbols-outlined">lightbulb</div>
+                            <p class="text">
+                                An Out-of-Band Management (OOBM) Network 
+                                
+                                An Overlay Network is a virtual/logical network decoupled from the
+                                physical topology of the underlying network giving you host mobility. 
+                                Overlay networks may span across multiple racks, clients can use the <a href="">leaprack's client</a> 
+                                to connect to an organization overlay network.
+                            </p>
+                        </div>
+                        <div style="margin-top: 30px;">
+                            <button class="add-network">Add Overlay</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <section class="content" style="display: none;">
+            <h1 class="title">Create LAN</h1>
+            <p class="desc">LANs are networks connecting end-user devices.</p>
+            <div class="step-title" style="margin-top: 40px;">Choose Rack</div>
+
+            <div class="rack-list">
+                <div class="rack">
+                    <div class="rack-country">
+                        <div class="flag">
+                            <span class="isp-status-indicator"></span>
+                        </div>
+                        <div class="name">lim15109</div>
+                    </div>
+                    <div class="rack-code">Operational</div>
+                </div>
+                <div class="rack">
+                    <div class="rack-country">
+                        <div class="flag">
+                            <span class="isp-status-indicator"></span>
+                        </div>
+                        <div class="name">crz02165</div>
+                    </div>
+                    <div class="rack-code">Degraded</div>
+                </div>
+                <div class="rack">
+                    <div class="rack-country">
+                        <div class="flag">
+                            <span class="isp-status-indicator"></span>
+                        </div>
+                        <div class="name">nj07503</div>
+                    </div>
+                    <div class="rack-code">Offline</div>
+                </div>
+            </div>
+            <div class="step-title" style="margin-top: 40px;">VLAN / Trunk</div>
+            <div class="trunk-list">
+                <div class="trunk">
+                    <div class="select">
+                        <input type="radio" value="[TRUNK-ID]">
+                    </div>
+                    <div class="content">
+                        <span class="trunk-name">TRUNK1</span>
+                        <div class="vlan-select">
+                            <div class="dec"></div>
+                            <input type="text" class="input-vid" value="VID 10">
+                            <div class="inc"></div>
+                        </div> 
+                    </div>
+                </div>
+                <div class="trunk">
+                    <div class="select">
+                        <input type="radio" value="[TRUNK-ID]">
+                    </div>
+                    <div class="content">
+                        <span class="trunk-name">TRUNK2</span>
+                        <div class="vlan-select">
+                            <div class="dec"></div>
+                            <input type="text" class="input-vid" value="VID 15">
+                            <div class="inc"></div>
+                        </div> 
+                    </div>
+                </div>
+            </div>
+            <div class="step-title" style="margin-top: 40px;">Network ID</div>
+            <div class="network-id">
+                <div class="select">IPv6</div>
+                <div class="textbox">
+                    <label>GUA Prefix</label>
+                    <input type="text" class="value" placeholder="2a0f:85c1:083f:083f::/64" value="@rack..:0001::/64">
+                    <span class="validation-mark">
+                        <span class="check-mark">&#10004;</span>
+                    </span>
+                </div>
+            </div>
+            <div class="network-name">
+                <div class="textbox">
+                    <label>LAN Name</label>
+                    <input type="text" class="value" placeholder="users-trusted1">
+                    <span class="validation-mark">
+                        <span class="check-mark">&#10004;</span>
+                    </span>
+                </div>
+            </div>
+            <div class="comment" style="margin-top: 20px">
+                <div class="icon">
+                    <span class="info">i</span>
+                </div>
+                <p class="content">
+                    The <strong>@</strong> symbol can be used before a Network Name (e.g. <strong>@users-trusted1</strong>) to indirectly reference its IPv6 GUA Prefix or IPv4 Subnet Number.
+                    This syntax can be used wherever IP Address Ranges are used, for instance, Firewall and NAT Rules. 
+                </p>
+            </div>
+            <button class="btn-submit">Create LAN</button>
+        </section>
+        
+        <section class="content" style=" display: none; margin-bottom: 50px;">
+            <div class="obj-heading">
+                <div class="icon"></div>
+                <div class="content">
+                    <div class="obj-kind">IPv6 LAN</div>
+                    <div class="obj-name">users-trusted1</div>
+                    <div class="obj-id">2a0f:85c1:083f:083f::/64</div>
+                </div>
+            </div>
+            <div class="obj-content" style="margin-top: 40px;">
+                <aside class="category-list" style="width: 700px">
+                    <div class="item active">General</div>
+                    <div class="item">Routers</div>
+                    <div class="item">DHCP</div>
+                    <div class="item">SNAT</div>
+                    <div class="item">Firewall</div>
+                    <div class="item">Graphs</div>
+                    <div class="item">History</div>
+                </aside>
+                <div class="page-content">
+                    <div class="step-title">Add Router</div>
+                    <div class="comment">
+                        <div class="content">Routers must be added to LANs in order for local hosts to talk to external networks</div>
+                    </div>
+                    <div class="add-node" style="margin-top: 20px; margin-right: 10px">
+                        <div class="select-node">
+                            <span class="node-name">Node1</span>
+                            <span class="node-specs">8 Core / 16GB RAM / 10Gbps</span>
+                        </div>
+                        <div class="host-id">
+                            <div class="textbox">
+                                <label for="">Host ID</label>
+                                <input type="text" class="value" placeholder="::1">
+                                <span class="validation-mark">
+                                    <span class="check-mark">&#10004;</span>
+                                </span>
+                            </div>
+                        </div>
+                        <btn class="btn-submit" style="margin: 0 0 0 20px">Add Router</btn>
+                    </div>
+                    <div class="comment" style="margin-top: 15px">
+                        <div class="icon">
+                            <span class="info small">i</span>
+                        </div>
+                        <p class="content">
+                            The alias <strong>node1@users-trusted1</strong> will be created once the router is added.
+                        </p>
+                    </div>
+                    <div class="step-title" style="margin-top: 30px">Routers</div>
+                    <div class="step-title" style="margin-top: 30px">Gateway</div>
+                    <div class="options-wrapper">
+                        <div class="option-wrapper single-gateway">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">None</span>
+                                <p class="text">
+                                    On this mode no router will respond to Router Solicitations (RS) nor send Router Advertisements (RA),
+                                    meaning that end-user devices will need to manually configure their default gateway if they want 
+                                    to communicate with hosts outside their local network.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="option-wrapper single-gateway">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">VRRP</span>
+                                <p class="text">
+                                    The Virtual Router Redundancy Protocol (VRRP) defined in RFC5798 provides redudancy for the default gateway. 
+                                    If this option is enabled all routers in the LAN will become part of a single VRRP Group.
+                                </p>
+                                <div class="host-id" style="margin-top: 15px; width: 240px;">
+                                    <div class="textbox">
+                                        <label for="">Virtual Router ID</label>
+                                        <input type="text" class="value" placeholder="::254">
+                                        <span class="validation-mark">
+                                            <span class="check-mark">&#10004;</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="option-wrapper single-gateway">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">Single</span>
+                                <p class="text">
+                                    On this mode a single router acts as the default gateway. This mode creates a Single Point of Failure 
+                                    and should only be used when there is a single node in the network.
+                                </p>
+                                <div class="select-node" style="width: 210px; margin-top: 10px">
+                                    <span class="node-name">Node01</span>
+                                    <span class="node-specs">2a0f:85c1:083f:083f::1</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comment">
+                        <div class="icon">
+                            <span class="info small">i</span>
+                        </div>
+                        <p class="content">
+                            The alias <strong>gw@users-trusted1</strong> will be created/updated upon save.
+                        </p>
+                    </div>
+                    <button class="btn-submit" style="width: 545px;">Save</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="content" style="display: none;">
+            <h1 class="title">Add an ISP</h1>
+            <p class="desc">ISPs provide transit to every destination in the Internet.</p>
+            <div class="step-title" style="margin-top: 40px;">Choose Rack</div>
+            <div class="rack-list">
+                <div class="rack">
+                    <div class="rack-country">
+                        <div class="flag">
+                        </div>
+                        <div class="name">Cusco</div>
+                    </div>
+                    <div class="rack-code">PE08003-R1</div>
+                </div>
+                <div class="rack">
+                    <div class="rack-country">
+                        <div class="flag"></div>
+                        <div class="name">Lima</div>
+                    </div>
+                    <div class="rack-code">PE15109-R1</div>
+                </div>
+                <div class="rack">
+                    <div class="rack-country">
+                        <div class="flag"></div>
+                        <div class="name">Patterson</div>
+                    </div>
+                    <div class="rack-code">US07503-R1</div>
+                </div>
+            </div>
+            <div class="step-title" style="margin-top: 40px;">VLAN / Trunk</div>
+            <div class="trunk-list">
+                <div class="trunk">
+                    <div class="select">
+                        <input type="radio" value="[TRUNK-ID]">
+                    </div>
+                    <div class="content">
+                        <span class="trunk-name">TRUNK1</span>
+                        <div class="vlan-select">
+                            <div class="dec"></div>
+                            <input type="text" class="input-vid" value="VID 10">
+                            <div class="inc"></div>
+                        </div> 
+                    </div>
+                </div>
+                <div class="trunk">
+                    <div class="select">
+                        <input type="radio" value="[TRUNK-ID]">
+                    </div>
+                    <div class="content">
+                        <span class="trunk-name">TRUNK2</span>
+                        <div class="vlan-select">
+                            <div class="dec"></div>
+                            <input type="text" class="input-vid" value="VID 15">
+                            <div class="inc"></div>
+                        </div> 
+                    </div>
+                </div>
+            </div>
+            <div class="step-title" style="margin-top: 40px;">Connection</div>
+            <div class="options-wrapper isp-connection-wrapper">
+                <div class="option-wrapper">
+                    <div class="option-select">
+                        <input type="radio">
+                    </div>
+                    <div class="option-content">
+                        <span class="heading-3">IPoE</span>
+                        <p class="text">
+                            IPoE is plain IP over Ethernet, Hosts connecting to IPoE Service Providers are typically configured dynamically via DHCP, or albeit less common, can be statically configured.
+                        </p>
+                    </div>
+                </div>
+                <div class="option-wrapper">
+                    <div class="option-select">
+                        <input type="radio">
+                    </div>
+                    <div class="option-content">
+                        <span class="heading-3">PPPoE</span>
+                        <p class="text">
+                            PPPoE encapsulates PPP frames over Ethernet to create a Point-To-Point link between the CPE and the router's PPPoE Server. 
+                            Use of PPPoE is falling out of favor due to the higher overhead compared to IPoE.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="comment">
+                <div class="content">Enter your ISP's colloquial name in your region:</div>
+            </div>
+            <div class="network-name" style="margin-top: 10px;">
+                <div class="textbox">
+                    <label>ISP Name</label>
+                    <input type="text" class="value" placeholder="movistar">
+                    <span class="validation-mark">
+                        <span class="check-mark">&#10004;</span>
+                    </span>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit">Add ISP</button>
+        </section>
+        <section class="content" style="display: none">
+            <div class="obj-heading">
+                <div class="icon"></div>
+                <div class="content">
+                    <div class="obj-kind">ISP 1</div>
+                    <div class="obj-name">movistar</div>
+                    <div class="obj-id">
+                        <span class="isp-status-indicator"></span>
+                        <span>IPv6+4 Up</span>
+                    </div>
+                </div>
+            </div>
+            <div class="obj-content" style="margin-top: 40px;">
+                <aside class="category-list" style="width: 700px">
+                    <div class="item">General</div>
+                    <div class="item">L2</div>
+                    <div class="item active">IP</div>
+                    <div class="item">DHCP</div>
+                    <!-- <div class="item">Trackers</div> -->
+                    <div class="item">DNAT</div>
+                    <div class="item">Firewall</div>
+                    <div class="item">Graphs</div>
+                    <div class="item">History</div>
+                </aside>
+                <div class="page-content">
+                    <!-- <div class="step-title">IPv6 Addresses</div>
+                    <div class="comment" style="margin-bottom: 15px">
+                        <div class="content">
+                            If your ISP supports IPv6, all addresses configured on your side of the WAN link 
+                            with the ISP's BNG (Broadband Network Gateway) will show up on the table below.
+                        </div>
+                    </div>
+                    <table class="table">
+                        <tr class="heading">
+                            <th>IPv6 Host Address</th>
+                            <th>Source</th>
+                            <th>Preferred LT</th>
+                            <th>Valid LT</th>
+                            <th></th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="na-box">
+                                    <div class="icon">
+                                        <span class="id"></span>
+                                    </div>
+                                    <div class="content">
+                                        <span class="label">Link-Local</span>
+                                        <span class="gua">fe80::216:3eff:fe17:bb6f/64</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Auto</td>
+                            <td>Forever</td>
+                            <td>Forever</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="na-box">
+                                    <div class="icon">
+                                        <span class="id"></span>
+                                    </div>
+                                    <div class="content">
+                                        <span class="label">Global Unicast</span>
+                                        <span class="gua">2800:200:44:8814::151/128</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>DHCP</td>
+                            <td>15476280s</td>
+                            <td>2516280s</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="na-box">
+                                    <div class="icon">
+                                        <span class="id"></span>
+                                    </div>
+                                    <div class="content">
+                                        <span class="label">Global Unicast</span>
+                                        <span class="gua">2800:200:44:8814:216:3eff:fe17:bb6f/64</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>RA</td>
+                            <td>604750s</td>
+                            <td>2591950s</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="na-box">
+                                    <div class="icon">
+                                        <span class="id"></span>
+                                    </div>
+                                    <div class="content">
+                                        <span class="label">Global Unicast</span>
+                                        <span class="gua">2800:200:44:8815::0a11/64</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Static</td>
+                            <td>Forever</td>
+                            <td>Forever</td>
+                            <td></td>
+                        </tr>
+                    </table> -->
+<!-- 
+                    <div class="options-wrapper">
+                        <div class="option-wrapper">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">Accept RA</span>
+                                <p class="text">
+                                    On this mode, GUAs will be configured based on the flags set in RA messages. That is, 
+                                    if the <strong>A</strong> flag is set then SLAAC will be used used to generate a GUA Address,
+                                    if the <strong>M</strong> flag is set then an address will be solicited via DHCPv6.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="option-wrapper">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">Static</span>
+                                <p class="text">
+                                    Define a static GUA provided by your ISP. This mode ignores RA messages, 
+                                    and you will also need to configure a static gateway.
+                                </p>
+                                <div class="ip-host-wrapper">
+                                    <div class="textbox-wrapper" style="width: 330px; margin-top: 10px">
+                                        <div class="textbox">
+                                            <label>IPv6 Address (GUA)</label>
+                                            <input type="text" class="value" placeholder="2800:200:44:8814:216:3eff:fe17:bb6f">
+                                            <span class="validation-mark">
+                                                <span class="check-mark">&#10004;</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="textbox-wrapper" style="margin-top: 10px; margin-left: 10px; width: 110px">
+                                        <div class="textbox">
+                                            <label>Prefix Length</label>
+                                            <input type="text" class="value" placeholder="/64">
+                                            <span class="validation-mark">
+                                                <span class="check-mark">&#10004;</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="option-wrapper">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">Disabled</span>
+                                <p class="text">
+                                    This mode ignores RA messages but it shouldn't affect access to the internet 
+                                    if a LLA is present and the right gateway is set.
+                                </p>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit" style="width: 544px; margin-top: 5px">Save</button>
+                    </div> -->
+<!-- 
+                    <div class="step-title" style="margin-top: 20px">IPv6 LLA</div>
+                    <div class="comment" style="margin-bottom: 15px">
+                        <div class="content">Control the configuration of IPv6 Link-Local Addresses.</div>
+                    </div>
+                    <div class="options-wrapper">
+                        <div class="option-wrapper">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">SLAAC</span>
+                                <p class="text">
+                                    On this mode, the host will use SLAAC to generated a LLA address. 
+                                    This mode is enabled by default and allows the CPE to talk to the BNG (Broadband Network Gateway) on the same L2 segment.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="option-wrapper">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">Disabled</span>
+                                <p class="text">
+                                    Use this mode if you need to disable the automatic generation of an IPv6 Link-Local Address. 
+                                    Note that this option will break internet connectivity if a LLA is configured as a default gateway (as is usually the case).
+                                </p>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit" style="width: 544px; margin-top: 5px">Save</button>
+                    </div> -->
+
+                    <div class="step-title">IPv6 Host</div>
+                    <div class="comment" style="margin-bottom: 15px">
+                        <div class="content">Define the IPv6 parameters for your side of the WAN link with the ISP's BNG.</div>
+                    </div>
+                    <div class="options-wrapper">
+                        <div class="option-wrapper">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">From RA</span>
+                                <p class="text">
+                                    On this mode, your WAN IP Address will be generated or learned via DHCP 
+                                    based on the flags included in RA messages. Also, the Source IP 
+                                    Adddress of incoming RA packets will be used as the default gateway. 
+                                </p>
+                            </div>
+                        </div>
+                        <div class="option-wrapper">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">Static</span>
+                                <p class="text">
+                                    Manually specify the IPv6 address of the BNG. It can be either a LLA or GUA Address 
+                                    but it must be part of a directly connected network.
+                                </p>
+                                <div class="ip-host-wrapper" style="display: flex; flex-direction: column;">
+                                    <div style="display: flex; margin-top: 10px;">
+                                        <div class="textbox-wrapper" style="width: 331px; margin-right: 15px;">
+                                            <div class="textbox">
+                                                <label>IPv6 GUA</label>
+                                                <input type="text" class="value" value="2800:200:44:8814:216:3eff:fe17:bb6f" placeholder="">
+                                                <span class="validation-mark">
+                                                    <span class="check-mark">&#10004;</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="textbox-wrapper" style="width: 100px; margin-right: 15px;">
+                                            <div class="textbox">
+                                                <label>Prefix Length</label>
+                                                <input type="text" class="value" value="/64" placeholder="">
+                                                <span class="validation-mark">
+                                                    <span class="check-mark">&#10004;</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="textbox-wrapper" style="width: 330px; margin-top: 10px">
+                                        <div class="textbox">
+                                            <label>IPv6 Gateway (LLA)</label>
+                                            <input type="text" class="value" placeholder="2800:200:44:8814:216:3eff:fe17:bb6f">
+                                            <span class="validation-mark">
+                                                <span class="check-mark">&#10004;</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <div class="option-wrapper">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">Disabled</span>
+                                <p class="text">
+                                    This mode disables IPv6 addressing, and sets the gateway to the blackhole IPv6 Address 100::/64
+                                    effectively disabling IPv6 traffic on the WAN link.
+                                </p>
+                            </div>
+                        </div> -->
+                        
+                        <!-- <div class="comment" style="margin-top: 0px">
+                            <div class="icon">
+                                <span class="info">i</span>
+                            </div>
+                            <p class="content">
+                                If your ISP implements <strong>MAC filtering</strong>, you might need to spoof the router's MAC Address within the MAC tab.
+                            </p>
+                        </div> -->
+                        <button type="submit" class="btn-submit" style="width: 544px; margin-top: 5px">Save</button>
+                    </div>
+
+                    <div class="step-title" style="margin-top: 20px;">IPv4 Host</div>
+                    <div class="comment" style="margin-bottom: 15px">
+                        <div class="content">Use this section to configure IPv6's parameters for your side of the WAN link with your ISP.</div>
+                    </div>
+                    <div class="options-wrapper">
+                        <div class="option-wrapper">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">DHCP</span>
+                                <p class="text">
+                                    Use this mode if your ISP is using DHCP to configure the customer's side of the WAN Link.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="option-wrapper">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">Static</span>
+                                <p class="text">
+                                    Enter the IPv4 address, mask and gateway provided by your ISP.
+                                </p>
+                                <div class="ip-host-wrapper">
+                                    <div class="textbox-wrapper" style="margin-top: 10px">
+                                        <div class="textbox">
+                                            <label>IPv4 Address</label>
+                                            <input type="text" class="value" placeholder="190.117.3.105">
+                                            <span class="validation-mark">
+                                                <span class="check-mark">&#10004;</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="textbox-wrapper" style="margin-left: 10px; margin-top: 10px">
+                                        <div class="textbox">
+                                            <label>Subnet Mask</label>
+                                            <input type="text" class="value" placeholder="255.255.255.0">
+                                            <span class="validation-mark">
+                                                <span class="check-mark">&#10004;</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="textbox-wrapper" style="margin-top: 10px">
+                                    <div class="textbox">
+                                        <label>Gateway</label>
+                                        <input type="text" class="value" placeholder="190.117.3.97">
+                                        <span class="validation-mark">
+                                            <span class="check-mark">&#10004;</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <div class="option-wrapper">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">Disabled</span>
+                                <p class="text">
+                                    Use this mode if you need to disable IPv4 on your side of the WAN Link.
+                                </p>
+                            </div>
+                        </div> -->
+                        <div class="comment" style="margin-top: 0px">
+                            <div class="icon">
+                                <span class="info">i</span>
+                            </div>
+                            <p class="content">
+                                If your ISP implements <strong>MAC filtering</strong>, you might need to spoof your CPE's MAC Address under the L2 tab.
+                            </p>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit" style="width: 544px;">Save</button>
+                </div>
+            </div>
+            <div class="obj-content" style="margin-top: 40px;">
+                <aside class="category-list" style="width: 700px">
+                    <div class="item">General</div>
+                    <div class="item">L2</div>
+                    <div class="item active">PPP</div>
+                    <div class="item">DHCP</div>
+                    <!-- <div class="item">Trackers</div> -->
+                    <div class="item">DNAT</div>
+                    <div class="item">Firewall</div>
+                    <div class="item">Graphs</div>
+                    <div class="item">History</div>
+                </aside>
+                <div class="page-content">
+                    <div class="step-title">Authentication</div>
+                    <div style="display: flex; flex-direction: row;">
+                        <div class="textbox-wrapper" style="width: 230px; margin-right: 10px">
+                            <div class="textbox">
+                                <label>Username</label>
+                                <input type="text" class="value" placeholder="speedy">
+                                <span class="validation-mark">
+                                    <span class="check-mark">&#10004;</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="textbox-wrapper" style="width: 230px;">
+                            <div class="textbox">
+                                <label>Password</label>
+                                <input type="text" class="value" placeholder="speedy">
+                                <span class="validation-mark">
+                                    <span class="check-mark">&#10004;</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="obj-content" style="margin-top: 40px;">
+                <aside class="category-list" style="width: 700px">
+                    <div class="item">General</div>
+                    <div class="item">L2</div>
+                    <div class="item">PPP</div>
+                    <div class="item active">DHCP</div>
+                    <!-- <div class="item">Trackers</div> -->
+                    <div class="item">DNAT</div>
+                    <div class="item">Firewall</div>
+                    <div class="item">Graphs</div>
+                    <div class="item">History</div>
+                </aside>
+                <div class="page-content">
+                    <div class="step-title">Add PD IA</div>
+                    <div class="comment">
+                        <div class="content">Add an IA for Prefix Delegation to be included in DHCPv6 solicit messages.</div>
+                    </div>
+                    <div style="display: flex; flex-direction: row; margin-top: 10px;">
+                        <div class="textbox-wrapper" style="width: 200px; margin-right: 15px;">
+                            <div class="textbox">
+                                <label>Prefix Hint</label>
+                                <input type="text" class="value" value="::/56" placeholder="">
+                                <span class="validation-mark">
+                                    <span class="check-mark">&#10004;</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="textbox-wrapper" style="width: 120px; margin-right: 15px;">
+                            <div class="textbox">
+                                <label>Preferred LT</label>
+                                <input type="text" class="value" value="3600s" placeholder="">
+                                <span class="validation-mark">
+                                    <span class="check-mark">&#10004;</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="textbox-wrapper" style="width: 120px;">
+                            <div class="textbox">
+                                <label>Valid LT</label>
+                                <input type="text" class="value" value="3800s" placeholder="">
+                                <span class="validation-mark">
+                                    <span class="check-mark">&#10004;</span>
+                                </span>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit" style="margin-top: 0px; margin-left: 15px; height: 52px;">Add IA</button>
+                    </div>
+
+                    <div class="step-title" style="margin-top: 20px">DHCPv6 PD</div>
+                    <div class="comment" style="margin-bottom: 15px">
+                        <div class="content">Manage all IAs for DHCPv6 Prefix Delegation.</div>
+                    </div>
+                    <table class="table">
+                        <tr class="heading">
+                            <th>Identity Association (IA)</th>
+                            <th>Status</th>
+                            <th>Preferred</th>
+                            <th>Valid</th>
+                            <th></th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="na-box">
+                                    <div class="icon">
+                                        <span class="id">0</span>
+                                    </div>
+                                    <div class="content">
+                                        <span class="label">@pd-movistar</span>
+                                        <!-- <span class="status">&#11129; DHCPv6 Reply Received</span> -->
+                                        <span class="gua">2800:200:44aa:8814::/64</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Allocated</td>
+                            <td>150s</td>
+                            <td>200s</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="na-box">
+                                    <div class="icon">
+                                        <span class="id">1</span>
+                                    </div>
+                                    <div class="content">
+                                        <span class="label">@pd1-movistar</span>
+                                        <!-- <span class="status">&#11129; DHCPv6 Reply Received</span> -->
+                                        <span class="gua">Prefix Hint: ::/64</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>NoPrefixAvail</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td></td>
+                        </tr>
+                    </table>
+
+                    <div class="step-title" style="margin-top: 40px">DHCPv6 NA</div>
+                    <div class="comment" style="margin-bottom: 15px">
+                        <div class="content">
+                            The Identity Association for Non-temporary Address is a DHCPv6 option (Code 3) used to configure GUAs on the WAN interface of CPEs.
+                            This option will only be sent if the M flag is set in RA Messages.
+                        </div>
+                    </div>
+                    <!-- <div class="na-wrapper">
+                        <div class="na-box">
+                            <div class="icon">
+                                <span class="status">0</span>
+                            </div>
+                            <div class="content">
+                                <span class="label">STATUS</span>
+                                <span class="status">&#11129; DHCPv6 Reply Received</span>
+                                <span class="gua">2800:200:44aa:8814:151a:fff1:eded:aaa1:eeff/128</span>
+                            </div>
+                        </div>
+                        <div class="na-timers">
+                            <div class="valid">VALID: 150s</div>
+                            <div class="preferred">PREFERRED: 100s</div>
+                        </div>
+                    </div> -->
+                    <table class="table">
+                        <tr class="heading">
+                            <th>Identity Association (IA)</th>
+                            <th>Status</th>
+                            <th>Preferred</th>
+                            <th>Valid</th>
+                            <th></th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="na-box">
+                                    <div class="icon">
+                                        <span class="id">0</span>
+                                    </div>
+                                    <div class="content">
+                                        <span class="label">wan@movistar</span>
+                                        <!-- <span class="status">&#11129; DHCPv6 Reply Received</span> -->
+                                        <span class="gua">2800:200:44aa:8814::eeff/128</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Allocated</td>
+                            <td>150s</td>
+                            <td>200s</td>
+                            <td></td>
+                        </tr>
+                    </table>
+
+                    <div class="step-title" style="margin-top: 40px">DHCPv6 DUID</div>
+                    <div class="comment" style="margin-bottom: 15px">
+                        <div class="content">ISPs will typically accept any DUID (DHCP Unique ID) in the Client ID Option <strong>(Code 1)</strong>, however if you're unable to get IP Addresses/Prefixes allocated try defining a custom DUID.</div>
+                    </div>
+                    <div style="display: flex; flex-direction: row;">
+                        <div class="options-wrapper">
+                            <div class="option-wrapper" style="width: 570px">
+                                <div class="option-select">
+                                    <input type="radio">
+                                </div>
+                                <div class="option-content">
+                                    <span class="heading-3">DUID-EN</span>
+                                    <p class="text" style="margin-top: 5px;">
+                                        To clone your device's DUID, lookup your CPE's brand in <a href="https://www.iana.org/assignments/enterprise-numbers/">IANA</a> and use its serial number as the Vendor-Assigned ID.
+                                    </p>
+                                    <div class="ip-host-wrapper">
+                                        <div class="selectbox" style="margin-top: 10px; margin-right: 10px; font-weight: 700; font-size: 14px;">
+                                            <div class="select">Auto</div>
+                                        </div>
+                                        <div class="textbox-wrapper" style="width: 120px; margin-top: 10px">
+                                            <div class="textbox">
+                                                <label>Vendor (PEN)</label>
+                                                <input type="text" class="value" placeholder="43793">
+                                                <span class="validation-mark">
+                                                    <span class="check-mark">&#10004;</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="textbox-wrapper" style="margin-top: 10px; margin-left: 10px; width: 260px">
+                                            <div class="textbox">
+                                                <label>Vendor-Assigned ID</label>
+                                                <input type="text" class="value" placeholder="4a3157c893cd4441">
+                                                <span class="validation-mark">
+                                                    <span class="check-mark">&#10004;</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="option-wrapper" style="width: 570px">
+                                <div class="option-select">
+                                    <input type="radio">
+                                </div>
+                                <div class="option-content">
+                                    <span class="heading-3">DUID-LL</span>
+                                    <p class="text">
+                                        To clone your device's DUID, manually specify the MAC Address of your CPE's WAN Interface.
+                                    </p>
+                                    <div class="ip-host-wrapper">
+                                        <div class="selectbox" style="margin-top: 10px; margin-right: 10px; font-weight: 700; font-size: 14px;">
+                                            <div class="select">Auto</div>
+                                        </div>
+                                        <div class="textbox-wrapper" style="margin-top: 10px; width: 220px">
+                                            <div class="textbox">
+                                                <label>MAC Address</label>
+                                                <input type="text" class="value" placeholder="4a3157c893cd4441">
+                                                <span class="validation-mark">
+                                                    <span class="check-mark">&#10004;</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <!-- <button type="submit" class="btn-submit" style="margin-top: 11px; margin-left: 10px">Autofill</button> -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="option-wrapper" style="width: 570px">
+                                <div class="option-select">
+                                    <input type="radio">
+                                </div>
+                                <div class="option-content">
+                                    <span class="heading-3">DUID-LLT</span>
+                                    <p class="text">
+                                        To clone your device's DUID, manually specify the MAC Address of your CPE's WAN Interface and the date the Address was generated.
+                                    </p>
+                                    <div class="ip-host-wrapper">
+                                        <div class="selectbox" style="margin-top: 10px; margin-right: 10px; font-weight: 700; font-size: 14px;">
+                                            <div class="select">Auto</div>
+                                        </div>
+                                        <div class="textbox-wrapper" style="margin-top: 10px; width: 220px">
+                                            <div class="textbox">
+                                                <label>MAC Address</label>
+                                                <input type="text" class="value" placeholder="4a3157c893cd4441">
+                                                <span class="validation-mark">
+                                                    <span class="check-mark">&#10004;</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="textbox-wrapper" style="margin-top: 10px; margin-left: 10px; width: 150px">
+                                            <div class="textbox">
+                                                <label>UTC Time</label>
+                                                <input type="text" class="value" placeholder="10/01/2024">
+                                                <span class="validation-mark">
+                                                    <span class="check-mark">&#10004;</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <!-- <button type="submit" class="btn-submit" style="margin-top: 11px; margin-left: 10px">Autofill</button> -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-submit" style="width: 615px; margin-top: 5px">Save</button>
+                        </div>
+                    </div>
+
+                    <!-- <div class="step-title" style="margin-top: 20px">DHCPv6 IAID</div>
+                    <div class="comment" style="margin-bottom: 15px">
+                        <div class="content">
+                            Define the Identity Association ID (IAID) included in DHCPv6 Options for  
+                            Temporary/Non-Temporary Address Assigment and Prefix Delegation. 
+                        </div>
+                    </div> -->
+               
+
+                    <div class="step-title" style="margin-top: 20px">DHCPv4 Client Identifier</div>
+                    <div class="comment" style="margin-bottom: 15px">
+                        <div class="content">
+                            Define the ID to be included in the Client ID Option for DHCPv4.
+                        </div>
+                    </div>
+                    <div class="options-wrapper">
+                        <div class="option-wrapper" style="width: 570px">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">DUID+IAID</span>
+                                <p class="text" style="margin-top: 5px;">
+                                    Use this mode if you need to align the client ID used for DHCPv4 with the client ID used by DHCPv6 as detailed in RFC4361. This mode will use an IA-ID value of 0.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="option-wrapper" style="width: 570px">
+                            <div class="option-select">
+                                <input type="radio">
+                            </div>
+                            <div class="option-content">
+                                <span class="heading-3">MAC</span>
+                                <p class="text">
+                                    Use this section to manually set the MAC Address to be included in the Client ID Option for DHCPv4.
+                                </p>
+                                <div class="ip-host-wrapper">
+                                    <div class="selectbox" style="margin-top: 10px; margin-right: 10px; font-weight: 700; font-size: 14px;">
+                                        <div class="select">L2 MAC</div>
+                                    </div>
+                                    <div class="textbox-wrapper" style="margin-top: 10px; width: 220px">
+                                        <div class="textbox">
+                                            <label>MAC Address</label>
+                                            <input type="text" class="value" placeholder="4a3157c893cd4441">
+                                            <span class="validation-mark">
+                                                <span class="check-mark">&#10004;</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <!-- <button type="submit" class="btn-submit" style="margin-top: 11px; margin-left: 10px">Autofill</button> -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit" style="width: 615px; margin-top: 5px">Save</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <script type="importmap">
+            {
+                "imports": {
+                    "sidebar": "/ui/sidebar/main.js",
+                    "rack": "/ui/rack/main.js",
+                    "@lit": "https://cdn.jsdelivr.net/gh/lit/dist@3/all/lit-all.min.js"
+                }
+            }
+        </script>
+        <script type="module">
+            import { Sidebar } from "sidebar";
+            import { Rack } from "rack";
+        </script>
+        
+    </body>
+</html>
+
+<template id="ui-rack-general">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <section class="nodes-section">
+        <div class="title">Nodes</div>
+        <div class="node-wrapper">
+            <div class="node-icon material-symbols-outlined">dns</div>
+            <div class="node-content">
+                <span class="node-name">Node 1</span>
+                <div class="node-os">Debian 11 LTS</div>
+                <span class="node-arch">ARM</span>
+            </div>
+            <div class="node-status up"></div>
+        </div>
+        <div class="node-wrapper">
+            <div class="node-icon material-symbols-outlined">
+                dns
+            </div>
+            <div class="node-content">
+                <span class="node-name">Node 2</span>
+                <div class="node-os">Debian 12 LTS</div>
+                <span class="node-arch">x86-64</span>
+            </div>
+            <div class="node-status degraded"></div>
+        </div>
+        <div class="node-wrapper">
+            <div class="node-icon material-symbols-outlined">dns</div>
+            <div class="node-content">
+                <span class="node-name">Node 3</span>
+                <div class="node-os">Ubuntu 22.04.1 LTS</div>
+                <span class="node-arch">x86-64</span>
+            </div>
+            <div class="node-status offline"></div>
+        </div>
+        <div class="node-wrapper">
+            <div class="node-icon material-symbols-outlined">dns</div>
+            <div class="node-content">
+                <span class="node-name">Node 4</span>
+                <div class="node-os">Ubuntu 22.04.1 LTS</div>
+                <span class="node-arch">x86-64</span>
+            </div>
+            <div class="node-status offline"></div>
+        </div>
+        <div class="node-wrapper">
+            <div class="node-icon material-symbols-outlined">dns</div>
+            <div class="node-content">
+                <span class="node-name">Node 5</span>
+                <div class="node-os">Ubuntu 22.04.1</div>
+                <span class="node-arch">x86-64</span>
+            </div>
+            <div class="node-status offline"></div>
+        </div>
+    </section>
+    <section class="join-section">
+        <div class="title">Join</div>
+        <div class=" join-info">
+            <p class="text">
+                To join a new node to an existing rack, you need to install rackd on the new node with 
+                <code>apt install rackd</code>, then run the following command:
+            </p>
+            <div class="cmd">
+                <span class="text">rack node join lim15109 [LINK] 41f50240d0ad563e</span>
+                <div class="actions">
+                    <span class="copy material-symbols-outlined">content_copy</span>
+                    <span class="timer"></span>
+                </div>
+            </div>
+            <p class="text">
+                Be sure to replace <code>LINK</code> with the name of the node's interface
+                connected to the ToR Switch. If you need to replace an existing node (e.g node3) use: <code>--as-node 3</code>
+            </p> 
+        </div>
+        <div class="join-request">
+            <div class="node-wrapper">
+                <div class="node-icon material-symbols-outlined">dns</div>
+                <div class="node-content">
+                    <span class="node-name">New Node</span>
+                    <div class="node-os">Debian 11 LTS</div>
+                    <span class="node-arch">Machine ID 41f5...e67d</span>
+                </div>
+                <div class="new-node material-symbols-outlined">asterisk</div>
+            </div>
+            <div class="actions">
+                <span class="btn accept">Accept</span>
+                <span class="btn deny material-symbols-outlined">close</span>
+            </div>
+        </div>
+    </section>
+    <section class="identity-section">
+        <div class="title">Identity</div>
+        <div class="form-entry asn">
+            <span class="form-label">Private ASN</span>
+            <div class="form-textbox">
+                <span class="editable material-symbols-outlined">lock</span>
+                <input type="text" class="asn" aria-label="asn" value="64512">
+            </div>
+        </div>
+        <div class="form-entry name">
+            <span class="form-label">Codename</span>
+            <div class="form-textbox">
+                <span class="editable material-symbols-outlined">lock</span>
+                <input type="text" class="codename" aria-label="asn" value="LIM15109">
+            </div>
+        </div>
+        <div class="form-entry gua">
+            <span class="form-label">IPv6 GUA Prefix</span>
+            <div class="form-textbox">
+                <span class="editable material-symbols-outlined">lock</span>
+                <input type="text" class="prefix" aria-label="gua" value="2a0f:85c1:083f:0100/56">
+            </div>
+        </div>
+        <!-- <div class="tooltip-wrapper">
+            <div class="icon material-symbols-outlined">lightbulb</div>
+            <p class="text">
+                These fields must be unique across all racks in the organization. To update one of the fiels, slide the lock to the right update field and lock it back in.
+            </p>
+        </div> -->
+
+        <!-- <div class="col-wrapper">
+            <div class="col-65">
+            </div>
+        </div> -->
+    </section>
+    <style>
+        :host {
+            display: grid;
+            grid-template-columns: 1fr;
+            row-gap: 50px;
+            padding-bottom: 50px;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        section > .title {
+            line-height: 1;
+            font-weight: 400;
+            font-size: 28px;
+        }
+
+        /* Nodes Section */
+        .nodes-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            column-gap: 40px;
+            row-gap: 30px;
+        }
+
+        .nodes-section > .title {
+            grid-column: 1 / 5;
+        }
+
+        .node-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            border-radius: 4px;
+        }
+
+        .node-wrapper > .options-icon  {
+            position: absolute;
+            font-size: 16px;
+            right: 4px;
+            top: 4px;
+        }
+
+        .node-wrapper > .node-icon {
+            width: 67px;
+            height: 67px;
+            background: #eef3f7;
+            border-radius: 5px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .node-wrapper > .node-status {
+            display: flex;
+            width: 11px;
+            height: 11px;
+            margin-right: 2px;
+            border-radius: 50%;
+            border: 6px solid white;
+            position: absolute;
+            top: -1px;
+            left: -1px;
+        }
+
+        .node-wrapper > .new-node {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            width: 15px;
+            height: 15px;
+            margin-right: 2px;
+            border-radius: 50%;
+            border: 6px solid white;
+            background: white;
+            position: absolute;
+            top: -3px;
+            left: -2px;
+        }
+
+        .node-wrapper > .node-status.up {
+            background: #15b83e;
+        }
+
+        .node-wrapper > .node-status.degraded {
+            background: #15b83e;
+        }
+
+        .node-wrapper > .node-status.offline {
+            background: #ccc;
+        }
+
+        .node-wrapper > .node-content {
+            display: flex;
+            flex-direction: column;
+            margin-left: 15px;
+        }
+
+        .node-wrapper > .node-content > .node-arch {
+            font-size: 14px;
+            font-weight: 400;
+            color: #444;
+        }
+
+        .node-wrapper > .node-content > .node-name {
+            font-size: 20px;
+            font-weight: 400;
+        }
+
+        .node-wrapper > .node-content > .node-os {
+            font-family: "Teachers";
+            margin-top: 2px;
+            margin-bottom: 4px;
+            font-size: 16px;
+            font-weight: 400;
+            color: #444;
+            line-height: 1;
+            text-wrap: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .tooltip-wrapper {
+            display: flex;
+            width: 70%;
+            flex-direction: row;
+            border-radius: 15px;
+            background: #f6f7ee;
+            padding: 20px;
+        }
+
+        .tooltip-wrapper > .icon {
+            font-size: 32px;
+        }
+
+        .tooltip-wrapper > p.text {
+            margin-left: 10px;
+            font-size: 15px;
+        }
+
+        button.add-network {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 50px;
+            padding: 0 20px;
+            background: #1a73e8;
+            color: white;
+            font-family: "Teachers";
+            font-size: 17px;
+            font-weight: 500;
+            border: none;
+            border-radius: 36px;
+        }
+        
+        /* Join Section */
+        .join-section {
+            display: grid;
+            grid-template-columns: 6.5fr 3.5fr;
+            column-gap: 60px;
+            row-gap: 20px;
+        }
+
+        .join-section > .title {
+            grid-column: 1 / 3;
+        }
+        
+        .cmd {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            margin-top: 22px;
+            margin-bottom: 22px;
+            background: #efefef;
+            border-radius: 8px;
+        }
+
+        .cmd > .text {
+            font-size: 14px;
+            font-weight: 500;
+            font-family: monospace;
+            font-optical-sizing: auto;
+            /* color: white; */
+        }
+
+
+        .cmd > .actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .cmd > .actions > .copy {
+            /* padding: 5px 15px; */
+            /* background: white; */
+            color: #444;
+            font-size: 24px;
+            font-weight: 400;
+            margin-right: 10px;
+            /* border-radius: 17px; */
+        }
+
+        .cmd > .actions > .timer {
+            border: 3px solid #444;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        code {
+            background: #efefef;
+            font-size: 14px;
+            font-weight: 400;
+            font-family: monospace;
+            font-optical-sizing: auto;
+            color: black;
+            white-space: nowrap;
+        }
+
+        .join-request {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .join-request > .node-wrapper {
+            margin-right: 0;
+        }
+
+        .join-request > .actions {
+            display: flex;
+        }
+
+        .join-request > .actions > .btn {
+            display: flex;
+            margin-top: 0;
+            margin-top: 15px;
+            height: 40px;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+            background: #eee;
+            color: #222;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 25px;
+            margin-left: 10px;
+            padding: 0 20px;
+        }
+
+        .join-request > .actions > .btn.accept {
+            color: white;
+            background: #1a73e8;
+        }
+
+        .join-request > .actions > .btn.deny {
+            padding: 0;
+            width: 40px;
+            color: #555;
+            font-size: 24px;
+            border-radius: 50%;
+        }
+
+        p strong {
+            font-weight: 600;
+        }
+
+        p {
+            font-family: "Teachers";
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 1.4;
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        p.size-small {
+            font-size: 12px;
+        }
+
+        /* Identity Section */
+
+        .identity-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            column-gap: 25px;
+            row-gap: 25px;
+        }
+
+        .identity-section > .title {
+            grid-column: 1 / 5;
+            margin-bottom: 0;
+        }
+
+        .form-entry {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .form-entry.asn {
+            grid-column: 1;
+        }
+
+        .form-entry.name {
+            grid-column: 2;
+        }
+
+        .form-entry.gua {
+            grid-column: 1 / 3;
+            grid-row: 3;
+        }
+
+        .form-entry > .form-label {
+            display: flex;
+            font-size: 13px;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .form-entry > .form-textbox {
+            position: relative;
+            display: flex;
+            justify-self: flex-start;
+            flex-direction: row;
+            align-items: center;
+            height: 50px;
+            border-radius: 8px;
+            border: 2px solid #cecece;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .form-textbox > input {
+            border: none;
+            font-family: "DM Sans";
+            padding: 0 15px;
+            font-size: 18px;
+            font-weight: 400;
+            background: none;
+            color: #222;
+        }
+
+        .form-textbox > input.asn {
+            width: 150px;
+        }
+
+        .form-textbox > input.codename {
+            width: 150px;
+        }
+
+        .form-textbox > input.prefix {
+            width: 230px;
+        }
+
+        .form-textbox > .editable {
+            display: flex;
+            width: 25px;
+            font-size: 21px;
+            align-items: center;
+            justify-content: center;
+            color: #0c0d0e;
+            height: 100%;
+            background: #ebebeb;
+            padding-left: 10px;
+            margin-right: 10px;
+        }
+
+        .form-textbox > .editable::before {
+            content: "";
+            position: absolute;
+            right: -16px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-top: 46px solid #ebebeb;
+            border-right: 6px solid transparent;
+        }
+    </style>
+</template>

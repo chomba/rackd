@@ -1,0 +1,34 @@
+app-tabs {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    height: 50px;
+    --tab-width: 150px;
+    --gutter-width: 40px;
+    padding-top: 20px;
+}
+
+app-tab {
+    box-sizing: border-box;
+    width: var(--tab-width);
+    margin-right: var(--gutter-width);
+    font-family: "Teachers";
+    flex: 0 0 50%;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+    color: #333;
+    cursor: pointer;
+}
+
+app-tab[selected] {
+    font-weight: 500;
+    background: #cfe8fc;
+    color: #0b46d6;
+}
+
+app-panel {
+    width: calc(100% - (var(--tab-width) + var(--gutter-width)));
+    order: 1;
+    flex: 0 0 100%;
+}

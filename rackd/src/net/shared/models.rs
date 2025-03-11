@@ -26,7 +26,7 @@ impl Display for NetName {
 
 impl NetName { 
     pub fn new(s: &str) -> Option<NetName>  {
-        NetName::from_str(s).ok()
+        NetName::from_str(&s.to_lowercase()).ok()
     }
 }
 
@@ -47,25 +47,41 @@ pub enum PrefixLen {
     DualStack((u8, u8))
 }
 
-#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone, PartialEq, Eq)]
 pub struct Ipv6HostAddr {
     pub addr: Ipv6Addr,
     pub prefix_len: Ipv6PrefixLen
 }
 
-#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone, PartialEq, Eq)]
 pub struct Ipv4HostAddr {
-    pub address: Ipv4Addr,
+    pub addr: Ipv4Addr,
     pub mask_len: Ipv4PrefixLen
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
 pub struct Ipv4PrefixLen(u8);
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
 pub struct Ipv6PrefixLen(u8);
 
 impl Ipv6PrefixLen {
+    pub fn new(value: u8) -> Option<Self> {
+        // TBD: call try_from and map result to option
+        Some(Self(value))
+    }
+
+    pub fn value(&self) -> u8 {
+        self.0
+    }
+}
+
+impl Ipv4PrefixLen {
+    pub fn new(value: u8) -> Option<Self> {
+        // TBD: call try_from and map result to option
+        Some(Self(value))
+    }
+
     pub fn value(&self) -> u8 {
         self.0
     }
