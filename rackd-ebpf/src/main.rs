@@ -18,6 +18,7 @@ pub static mut IPV6_GATEWAY: Array<u128> = Array::with_max_entries(1, 0);
 pub static mut IPV4_GATEWAY: Array<u32> = Array::with_max_entries(1, 0);
 
 #[xdp]
+#[allow(static_mut_refs)]
 pub fn program(ctx: XdpContext) -> u32 {
     match try_work(ctx) {
         Ok(ret) => return ret,

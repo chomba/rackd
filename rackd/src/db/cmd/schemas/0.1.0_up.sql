@@ -11,18 +11,41 @@ CREATE TABLE IF NOT EXISTS event (
     data        TEXT        NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS wan (
-    seq             INTEGER     PRIMARY KEY,
-    version         INTEGER     NOT NULL,
-    id              TEXT        NOT NULL UNIQUE,
-    rack            TEXT        NOT NULL,
-    trunk           INTEGER     NOT NULL,
+CREATE TABLE IF NOT EXISTS entity (
+    id      TEXT      PRIMARY KEY,
+    value   TEXT      NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS network_view (
+    id              TEXT        PRIMARY KEY,
+    trunk_id        TEXT        NOT NULL,
+    trunk_name      TEXT        NOT NULL,
     vlan            INTEGER     NOT NULL,
-    conn            TEXT        NOT NULL,
     name            TEXT        NOT NULL,
-    mac             TEXT        NOT NULL,
+    kind            TEXT        NOT NULL,
     deleted         INTEGER     NOT NULL DEFAULT 0
 );
+
+CREATE TABLE IF NOT EXISTS wan_view (
+    id              TEXT        PRIMARY KEY,
+    rack_id         TEXT        NOT NULL,
+    rack_asn        INTEGER     NOT NULL,
+    trunk_id        TEXT        NOT NULL,
+    trunk_name      TEXT        NOT NULL,
+    vlan            INTEGER     NOT NULL,
+    name            TEXT        NOT NULL,
+    mode            TEXT        NOT NULL,
+    deleted         INTEGER     NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS trunk_view (
+    id              TEXT        PRIMARY KEY,
+    name            TEXT        NOT NULL UNIQUE,
+    deleted         INTEGER     NOT NULL DEFAULT 0
+);
+
+
+
 
 CREATE TABLE IF NOT EXISTS lan4 (
     seq             INTEGER     PRIMARY KEY,

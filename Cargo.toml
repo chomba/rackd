@@ -4,6 +4,7 @@ members = ["rackd", "rackd-ebpf", "rackd-web"]
 default-members = ["rackd"]
 
 [workspace.dependencies]
+axum = { version = "0.8.1", features = ["json", "macros","original-uri"] }
 which = { version = "6.0.0", default-features = false }
 env_logger = { version = "0.11.5", default-features = false }
 aya = { version = "0.13.1", default-features = false }
@@ -14,6 +15,13 @@ aya-log-ebpf = { version = "0.1.1", default-features = false }
 libc = { version = "0.2.159", default-features = false }
 log = { version = "0.4.22", default-features = false }
 anyhow = { version = "1", default-features = false }
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = { version = "1.0.128", default-features = false }
+serde_yaml = { version = "0.9.34", default-features = false }
+tokio = { version = "1.40.0", features = ["full"] }
+tokio-util = "0.7.12"
+tower = "0.5.2"
+tower-http = { version  = "0.6.2", features = ["fs"] }
 network-types = "0.0.7"
 macaddr = "1.0.1"
 dotenv = "0.15.0"

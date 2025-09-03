@@ -1,9 +1,9 @@
 use log::error;
 use rusqlite::Connection;
-use semver::Version;
-use crate::{conf, util::actor::{Actor, AsyncActor, Handle}};
-use super::cmd::{RackdCmd, RackdCmdActor};
+use crate::util::actor::{Actor, Handle, Msg, Payload};
+use super::{cmd::{RackdCmd, RackdCmdActor}, query::{RackdQuery, RackdQueryActor}};
 use crate::db;
+use thiserror::Error;
 
 // The API Actor (Handling REST/gRPC request) is going to front the
 // CmdActor and the QueryActor, meaning the API Actor needs to hold both the Cmd Actor
@@ -44,28 +44,45 @@ pub enum ActorStatus {
 //     }
 // }
 
-
-
-pub struct ActorSystem {
-    pub cmd: Handle<RackdCmd>
+#[derive(Clone)]
+pub struct Rackd {
+    pub cmd: Handle<RackdCmd>,
+    pub query: Handle<RackdQuery>
 }
 
-impl ActorSystem {
-    pub fn mock() -> Self {
-        let conn = Connection::open_in_memory()
-            .map_err(|e| error!("Failed to open in-memory db: {}", e))
-            .unwrap();
-        Self::new(conn)
+#[derive(Debug, Error)]
+pub enum RackdError {
+    #[error("{}", .0)]
+    Db(#[from] rusqlite::Error)
+}
+
+impl Rackd {
+    pub async fn exec<P>(&self, cmd: P) -> Result<P::Ok, P::Err> where P: Payload, RackdCmd: From<Msg<P>> {
+        self.cmd.send(cmd).await
     }
 
-    pub fn new(cmd_db: Connection) -> Self {
-        // Run Db Migrations
-        // let settings = conf::settings();
-        let conn = db::cmd::migrations::runner().run(cmd_db);
-        // Spawn Actors
-        let cmd_handle = RackdCmdActor::spawn(RackdCmdActor::new(conn));
-        Self { cmd: cmd_handle }
+    pub async fn query<P>(&self, query: P) -> Result<P::Ok, P::Err> where P: Payload, RackdQuery: From<Msg<P>> {
+        // TBD: Schedule query to pool of QueryActors (only if stress tests show a single actor won't be enough)
+        self.query.send(query).await
+    }
 
+    pub fn mock() -> Result<Self, RackdError> {
+        let _ = env_logger::builder()
+            .filter_level(log::LevelFilter::Error)
+            .format_target(false)
+            .format_timestamp(None)
+            .try_init();
+        db::cmd::migrations::runner().run(Connection::open_in_memory()?);
+        let cmd = RackdCmdActor::spawn(RackdCmdActor::new(Connection::open_in_memory()?));
+        let query = RackdQueryActor::spawn(RackdQueryActor::new(Connection::open_in_memory()?));
+        Ok(Self { cmd, query })
+    }
+
+    pub fn new(path: &str) -> Result<Self, RackdError> {
+        db::cmd::migrations::runner().run(Connection::open(path).unwrap());
+        let cmd = RackdCmdActor::spawn(RackdCmdActor::new(Connection::open(path)?)); 
+        let query = RackdQueryActor::spawn(RackdQueryActor::new(Connection::open(path)?)); 
+        Ok(Self { cmd, query })
 
         // let (tx_app, rx_app) = mpsc::channel::<AppMessage>(10);
         // let (tx_sys, rx_sys) = mpsc::channel::<SysMessage>(10);

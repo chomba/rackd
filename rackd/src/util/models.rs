@@ -1,9 +1,41 @@
 use std::fmt::Display;
-use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use uuid::Uuid;
-use crate::net::wan::models::WanEvent;
+use serde::{Deserialize, Serialize};
+use crate::{trunk::model::TrunkEvent, wan::model::entity::WanEvent};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Metadata {
+    pub version: u32,
+    pub events: Vec<Event>
+}
+
+impl Default for Metadata {
+    fn default() -> Self {
+        Self {
+            version: 0,
+            events: vec![]
+        }
+    }
+}
+
+pub trait Entity where Self::E: Into<EventData> {
+    type E;
+
+    fn id(&self) -> Id; 
+    fn metadata(&mut self) -> &mut Metadata;
+    fn apply(&mut self, e: &Self::E);
+    fn process(&mut self, e: Self::E) {
+        self.apply(&e);
+        let stream_id = self.id();
+        let metadata = self.metadata();
+        let e = Event::single(stream_id, e.into(), metadata.version);
+        metadata.version += 1;
+        metadata.events.push(e);
+    }    
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Event {
     pub id: Id,
     // pub seq: u32,
@@ -36,56 +68,11 @@ impl Event {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum EventData {
-    Wan(WanEvent)
+    Wan(WanEvent),
+    Trunk(TrunkEvent)
 }
-// #[derive(Debug, Clone)]
-// pub struct Metadata<T> where T: Entity {
-//     // Date: CreatedOn
-//     // Date: LastModified
-//     pub seq: u32,       // Sequence Number
-//     pub version: u32,   // Current Entity Version
-//     pub events: Option<Vec<T::Event>>
-// }
 
-// impl<T> Default for Metadata<T> where T: Entity {
-//     fn default() -> Self {
-//         Self {
-//             seq: u32::default(),
-//             version: u32::default(),
-//             events: None
-//         }
-//     }
-// }
-
-// pub trait EventHandler<E> {
-//     fn handle(&mut self, event: &E) -> ();
-// }
-
-// pub trait Entity where Self: Sized {
-//     type Event; // EtityEvent becomes AppEvent (EventData) which later becomes Event
-//     fn id(&self) -> Id;
-//     fn apply(&mut self, e: &Self::Event);
-//     fn metadata(&mut self) -> &mut Metadata<Self>;
-    
-//     fn events(&mut self) -> Vec<Self::Event> {
-//         match self.metadata().events.take() {
-//             Some(events) => events,
-//             None => vec![]
-//         }
-//     }
-
-//     fn process(&mut self, e: Self::Event) {
-//         self.apply(&e);
-//         let metadata = self.metadata();
-//         match metadata.events {
-//             Some(ref mut events) => events.push(e),
-//             None => metadata.events = Some(vec![e])
-//         }
-//         metadata.version += 1;
-//     }
-// }
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Clone, Copy, ToSchema)]
 pub struct Id(Uuid);
 
 impl Id {
@@ -106,76 +93,152 @@ impl Display for Id {
     }
 }
 
-mod casts {
+pub mod casts {
     use std::str::FromStr;
+    use serde_json::Value;
+    use thiserror::Error;
+    use unicode_segmentation::UnicodeSegmentation;
     use uuid::Uuid;
-    use super::Id;
+    use super::Id;  
 
-    impl From<Uuid> for Id {
-        fn from(id: Uuid) -> Self {
-            Self(id)
+    impl FromStr for Id {
+        type Err = uuid::Error;
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            Ok(Self(Uuid::parse_str(s)?))
         }
     }
-    
-    impl From<Id> for Uuid {
-        fn from(id: Id) -> Self {
-            id.0
+
+    #[derive(Debug, Error)]
+    pub enum IdError {
+        #[error("Value is not a String [{}]", .0)]
+        InvalidType(Value),
+        #[error("Value is not a UUID [{}]", .0)]
+        InvalidFormat(String),
+        #[error("No value provided")]
+        MissingValue
+    }
+
+    impl TryFrom<Value> for Id {
+        type Error = IdError;
+
+        fn try_from(value: Value) -> Result<Self, Self::Error> {
+            match value {
+                Value::String(s) => match Uuid::parse_str(&s) {
+                    Err(_) => Err(IdError::InvalidFormat(s)),
+                    Ok(id) => Ok(Id(id))
+                },
+                Value::Null => Err(IdError::MissingValue),
+                _ => Err(IdError::InvalidType(value))
+            }
+        }
+    }  
+
+    #[derive(Debug)]
+    pub struct InvalidChars { 
+        pub value: String, 
+        pub chars: Vec<String> 
+    }
+
+    impl InvalidChars {
+        // TBD: Add Parameter: allow_extended_unicode
+        pub fn from<T>(value: T, forbidden_chars: &[char]) -> Option<InvalidChars> where T: Into<String> {
+            let value = value.into();
+            let mut bad_graphemes = vec![];
+            for g in value.graphemes(true) {
+                let chars: Vec<char> = g.chars().collect(); 
+                match chars.len() {
+                    1 => {
+                        let c = chars[0];
+                        if !char::is_ascii_alphanumeric(&c) || forbidden_chars.contains(&c) {
+                            bad_graphemes.push(String::from(c));
+                        }
+                    },
+                    _ => bad_graphemes.push(String::from(g))
+                }
+            }
+
+            if bad_graphemes.is_empty() {
+                None
+            } else {
+                Some(InvalidChars { value, chars: bad_graphemes })
+            }
         }
     }
+
+    // impl TryFrom<Option<Value>> for Id {
+    //     type Error = IdError;
+
+    //     fn try_from(value: Option<Value>) -> Result<Self, Self::Error> {
+    //         match value {
+    //             Some(value) => Self::try_from(value),
+    //             None => Err(IdError::MissingKey)
+    //         }
+    //     }
+    // }
+
+    // impl Display for InvalidId {
+    //     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    //         write!(f, "{} is not a valid UUID", self.0)
+    //     }
+    // }
+
+    // impl TryFrom<Value> for Id {
+    //     type Error = ;
+    // } 
+
 
     pub trait FromManyStr where Self: Sized {
         type Error;
         fn from_many_str(values: &Vec<String>) -> Result<Vec<Self>, Self::Error>; 
     }
     
-    impl FromManyStr for Id {
-        type Error = uuid::Error;
-        fn from_many_str(values: &Vec<String>) -> Result<Vec<Self>, Self::Error> {
-            let mut ids = Vec::<Id>::new();
-            for s in values {
-                match Uuid::from_str(s) {
-                    Ok(id) => ids.push(Id(id)),
-                    Err(e) => return Err(e)
-                }
-            }
-            Ok(ids)
+    // impl FromManyStr for Id {
+    //     type Error = uuid::Error;
+    //     fn from_many_str(values: &Vec<String>) -> Result<Vec<Self>, Self::Error> {
+    //         let mut ids = Vec::<Id>::new();
+    //         for s in values {
+    //             match Uuid::from_str(s) {
+    //                 Ok(id) => ids.push(Id(id)),
+    //                 Err(e) => return Err(e)
+    //             }
+    //         }
+    //         Ok(ids)
+    //     }
+    // }
+}
+
+pub mod sqlite {
+    use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSqlOutput, ValueRef};
+    use rusqlite::{Error, ToSql};
+    use rusqlite::Result;
+    use uuid::Uuid;
+    use crate::util::models::EventData;
+    use super::Id;
+
+    impl ToSql for Id {
+        fn to_sql(&self) -> Result<ToSqlOutput<'_>> {
+            Ok(self.0.to_string().into())
+        }
+    }
+    
+    impl FromSql for Id {
+        fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+            let id = Uuid::try_from(value.as_str()?).map_err(|e| FromSqlError::Other(Box::new(e)))?;
+            Ok(Self(id))
         }
     }
 
-    mod sqlite {
-        use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSqlOutput, ValueRef};
-        use rusqlite::{Error, ToSql};
-        use rusqlite::Result;
-        use uuid::Uuid;
-        use crate::util::models::EventData;
-
-        use super::Id;
-
-        impl ToSql for Id {
-            fn to_sql(&self) -> Result<ToSqlOutput<'_>> {
-                Ok(self.0.to_string().into())
-            }
+    impl ToSql for EventData {
+        fn to_sql(&self) -> Result<ToSqlOutput<'_>> {
+            let json = serde_json::to_string(self).map_err(|e| Error::ToSqlConversionFailure(Box::new(e)))?;
+            Ok(json.into())
         }
-        
-        impl FromSql for Id {
-            fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
-                let id = Uuid::try_from(value.as_str()?).map_err(|e| FromSqlError::Other(Box::new(e)))?;
-                Ok(Id(id))
-            }
-        }
+    }
 
-        impl ToSql for EventData {
-            fn to_sql(&self) -> Result<ToSqlOutput<'_>> {
-                let json = serde_json::to_string(self).map_err(|e| Error::ToSqlConversionFailure(Box::new(e)))?;
-                Ok(json.into())
-            }
-        }
-
-        impl FromSql for EventData {
-            fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
-                let value: Self = serde_json::from_str(value.as_str()?).map_err(|e| FromSqlError::Other(Box::new(e)))?;
-                Ok(value)
-            }
+    impl FromSql for EventData {
+        fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+            let value: Self = serde_json::from_str(value.as_str()?).map_err(|e| FromSqlError::Other(Box::new(e)))?;
+            Ok(value)
         }
     }
 }

@@ -1,10 +1,17 @@
 use rusqlite::Connection;
-use crate::net::wan::cmd::WanCmd;
-use crate::net::NetCmd;
+use crate::trunk::cmd::TrunkCmd;
+use crate::wan::cmd::WanCmd;
 use crate::util::actor::{Actor, Process};
 
+#[derive(Debug)]
 pub struct RackdCmdActor {
     pub conn: Connection
+}
+
+#[derive(Debug)]
+pub enum RackdCmd {
+    Trunk(TrunkCmd),
+    Wan(WanCmd)
 }
 
 impl Actor for RackdCmdActor {
@@ -12,7 +19,7 @@ impl Actor for RackdCmdActor {
 
     fn receive(&mut self, cmd: RackdCmd) {
         match cmd {
-            RackdCmd::Net(NetCmd::Wan(cmd)) => match cmd {
+            RackdCmd::Wan(cmd) => match cmd {
                 WanCmd::Create(cmd) => {
                     let response = cmd.payload.process(self);
                     let _ = cmd.respond_to.send(response);
@@ -21,27 +28,21 @@ impl Actor for RackdCmdActor {
                     let response = cmd.payload.process(self);
                     let _ = cmd.respond_to.send(response);
                 },
-                WanCmd::SetMacToSpoof(cmd) => {
+                WanCmd::SetMacAddr(cmd) => {
                     let response = cmd.payload.process(self);
                     let _ = cmd.respond_to.send(response);
                 },
-                WanCmd::SetMacToAuto(cmd) => {
+                WanCmd::SetIpv4Params(cmd) => {
                     let response = cmd.payload.process(self);
                     let _ = cmd.respond_to.send(response);
                 },
-                WanCmd::SetIpv6ToStatic(cmd) => {
-                    let response = cmd.payload.process(self);
-                    let _ = cmd.respond_to.send(response);
-                },
-                WanCmd::SetIpv6ToRA(cmd) => {
-                    let response = cmd.payload.process(self);
-                    let _ = cmd.respond_to.send(response);
-                },
-                WanCmd::SetIpv4ToDHCP(cmd) => {
-                    let response = cmd.payload.process(self);
-                    let _ = cmd.respond_to.send(response);
-                },
-                WanCmd::SetIpv4ToStatic(cmd) => {
+                // WanCmd::SetIpv6(cmd) => {
+                //     let response = cmd.payload.process(self);
+                //     let _ = cmd.respond_to.send(response);
+                // }
+            },
+            RackdCmd::Trunk(cmd) => match cmd {
+                TrunkCmd::Create(cmd) => {
                     let response = cmd.payload.process(self);
                     let _ = cmd.respond_to.send(response);
                 }
@@ -117,17 +118,11 @@ impl Actor for RackdCmdActor {
     }
 }
 
-pub enum RackdCmd {
-    Net(NetCmd)
-}
-
 impl RackdCmdActor {
     pub fn new(conn: Connection) -> Self {
         Self { conn }
     }
 }
-
-
 
 // NetCmdActor:
 // Shares a single DB and DBConnection across all Network entities (LAN, WAN, etc)

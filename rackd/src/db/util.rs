@@ -6,7 +6,7 @@ use log::{error, info};
 use std::{collections::BTreeMap, ops::Bound::{Excluded, Included}};
 use semver::Version;
 use crate::{db::cmd::traits::*, util::models::Event};
-use super::query::traits::View;
+use super::query::traits::DbView;
 
 pub struct Projectors(pub HashMap<String, Projector>);
 
@@ -15,7 +15,7 @@ impl Projectors {
         Self(HashMap::new())
     }
 
-    pub fn register<T: View>(&mut self) {
+    pub fn register<T: DbView>(&mut self) {
         let projector = Projector {
             table: T::name(),
             apply: T::update,

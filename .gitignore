@@ -2,3 +2,5 @@
 /tmp
 /rackd/old-src
 /rackd/tmp
+/rackd-cli
+/api-schemas

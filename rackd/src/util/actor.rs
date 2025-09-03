@@ -69,14 +69,7 @@ pub trait Payload {
     // type Message = Msg<Payload>
 }
 
-/// Functional Core - Execute a command (should take a context) produce events and hydrate a view
-pub trait Execute: Sized + Payload {
-    type In;
-    type Out;
-
-    fn exec(self, input: Self::In) -> Result<Self::Out, Self::Err>;
-}
-
+#[derive(Debug)]
 pub struct Msg<P> where P: Payload {
     pub payload: P,
     pub respond_to: oneshot::Sender<Result<P::Ok, P::Err>>

@@ -1,46 +1,63 @@
 use log::error;
-use rusqlite::{params, types::FromSql, Connection, ToSql, Transaction};
-use semver::Version;
-use crate::util::models::Event;
+use rusqlite::{params, types::FromSql, ToSql, Transaction};
+use serde::{de::DeserializeOwned, Serialize};
+use crate::util::models::{Entity, Event, Id};
 
-// pub trait DbCommand {
-//     type Ok;
-//     type Err;
-//     fn exec(self, tx: &Transaction) -> Result<Self::Ok, Self::Err>;
-// }
+pub trait EntityStore {
+    fn save<T>(&self, entity: &mut T) -> Result<(), rusqlite::Error> where T: Entity + Serialize;
+    fn load<T, K>(&self, id: K) -> Result<Option<T>, rusqlite::Error> where T: Entity + DeserializeOwned, K: Into<Id>;
+}
+
+impl<'a> EntityStore for Transaction<'a> {
+    fn save<T>(&self, entity: &mut T) -> Result<(), rusqlite::Error> where T: Entity + Serialize {
+        let mut stmt = self.prepare("INSERT INTO entity (id, value) VALUES (?1, ?2)")
+            .map_err(|e| { error!("prepare() in EntityStore::save() failed: {}", e); e })?;
+        
+        stmt.execute(params! { entity.id(), serde_json::to_string(&entity).unwrap() })
+            .map_err(|e| { error!("execute() in EntityStore::save() failed: {}", e); e })?;
+
+        let events = std::mem::take(&mut entity.metadata().events);
+        EventStore::save_many(self, &events)?;
+        Ok(())
+    }
+
+    fn load<T, K>(&self, id: K) -> Result<Option<T>, rusqlite::Error> where T: Entity + DeserializeOwned, K: Into<Id> {
+        let id: Id = id.into();
+        let mut stmt = self.prepare("SELECT value FROM entity WHERE id = :id")
+            .map_err(|e| { error!("prepare() in EntityStore::load() failed: {}", e); e })?;
+        match stmt.query_row(&[(":id", &id.to_string())], |row| row.get::<_, String>(0)) {
+            Ok(value) => Ok(Some(serde_json::from_str(value.as_str()).unwrap())),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e).map_err(|e| { error!("query_row() in EntityStore::load() failed: {}", e); e })?
+        }
+    }
+}
+
 
 pub trait EventStore {
-    fn save(&self, e: &Event);
-    fn save_many<'b>(&self, events: impl IntoIterator<Item = &'b Event>);
+    fn save(&self, e: &Event) -> Result<(), rusqlite::Error>;
+    fn save_many<'b>(&self, events: impl IntoIterator<Item = &'b Event>) -> Result<(), rusqlite::Error>;
 }
 
 impl<'a> EventStore for Transaction<'a> {
-    fn save(&self, e: &Event) {
+    fn save(&self, e: &Event) -> Result<(), rusqlite::Error> {
         // SET DATETIME AND TRANSACION ID
         // Don't prepare the SQL Statement every time ()
         let mut stmt = self.prepare("INSERT INTO event (id, stream_id, version, data) VALUES (?1, ?2, ?3, ?4)")
-            .map_err(|e| error!("prepare() in EventStore::save() failed: {}", e)).unwrap();
+            .map_err(|e| { error!("prepare() in EventStore::save() failed: {}", e); e })?;
         stmt.execute(params! { e.id, e.stream_id, e.version, e.data })
-            .map_err(|e| error!("execute() in EventStore::save() failed: {}", e)).unwrap();
+            .map_err(|e| { error!("execute() in EventStore::save() failed: {}", e); e })?;
 
-        // let mut stmt = self.prepare("INSERT INTO event (id, stream_id, version, data) VALUES (?1, ?2, ?3, ?4) RETURNING seq, id, stream_id, version, data")?;
-        // let stored_event = stmt.query_row(params! { e.id, e.stream_id, e.version, e.data }, |row| {
-        //     Ok(Event {
-        //         // seq: row.get(0)?,
-        //         id: row.get(0)?,
-        //         stream_id: row.get(1)?,
-        //         version: row.get(2)?,
-        //         data: row.get(3)?
-        //     })
-        // })?;
         super::projectors().exec(self, &e);
         // super::reactors::reactors().exec(self, &e);
+        Ok(())
     }    
 
-    fn save_many<'b>(&self, events: impl IntoIterator<Item = &'b Event>) {
+    fn save_many<'b>(&self, events: impl IntoIterator<Item = &'b Event>) -> Result<(), rusqlite::Error> {
         for e in events {
-            self.save(e);
+            EventStore::save(self, e)?;
         }
+        Ok(())
     }
 }
 

@@ -195,14 +195,19 @@
 // EMITS CHANGES ABOUT ALL NAMED NETWORKS
 // RECEIVES CHANGES ABOUT DYNAMIC NETWORKS FROM THE WATCHDOG
 
-use std::{net::{Ipv4Addr, Ipv6Addr}, time::Duration};
+use std::{net::{Ipv4Addr, Ipv6Addr, SocketAddr}, time::Duration};
 use aya_log_ebpf::info;
 use aya::{maps::Array, programs::{Xdp, XdpFlags}};
 use aya_log::EbpfLogger;
 use log::{debug, warn};
-use rackd::{actors::{self, system::ActorSystem}, net::{shared::models::NetName, wan::cmd::Create}};
-use tokio::signal;
+use rackd::api;
+// use crate::{actors::{self, system::ActorSystem}, net::{shared::models::NetName, wan::cmd::Create}};
+use serde::{Deserialize, Serialize};
+use tokio::{net::TcpListener, signal};
 use dotenv::dotenv;
+use utoipa::OpenApi;
+use utoipa_axum::router::OpenApiRouter;
+use utoipa_swagger_ui::SwaggerUi;
 // Authentication:
 // https://fly.io/blog/api-tokens-a-tedious-survey/
 // Use Autehnticated requests?
@@ -213,22 +218,49 @@ use dotenv::dotenv;
 // WebMesh
 // https://webmeshproj.github.io/documentation/getting-started/
 
+// Renamed rackd to rackd-api
+
+
+
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), std::io::Error> {
     dotenv().ok();    
-    env_logger::init();
+    let _ = env_logger::builder()
+        .filter_level(log::LevelFilter::Error)
+        .format_target(false)
+        .format_timestamp(None)
+        .try_init();
+
+    #[derive(OpenApi)]
+    #[openapi(info(description = "API DESCRIPTION HERE"))]
+    struct ApiDoc;
+
+    let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
+        .nest("/v1", api::router())
+        .split_for_parts();
+
+    let router = router
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api.clone()));
+    let address = SocketAddr::from((Ipv4Addr::UNSPECIFIED, 8080));
+    let listener = TcpListener::bind(&address).await?;
+    axum::serve(listener, router.into_make_service()).await
+    
+    // env_logger::init();
     // ActorSystem::run();
     
+    // let app = Router::new()
+    //     .route("/wan", post())
+
     // Pass configuration file as argument border66 -conf=/etc/border66/config
     // Run ApiActor
-    match signal::ctrl_c().await {
-        Ok(()) => { 
-            println!("Program Terminated");
-        },
-        Err(err) => {
-            eprintln!("Unable to listen for shutdown signal: {}", err);
-        }
-    }
+    // match signal::ctrl_c().await {
+    //     Ok(()) => { 
+    //         println!("Program Terminated");
+    //     },
+    //     Err(err) => {
+    //         eprintln!("Unable to listen for shutdown signal: {}", err);
+    //     }
+    // }
     
     // let conn = Connection::open("/data/lab/rust/quickreplace/events.db").expect("Failed to get connection");
     // es::create(&conn).expect("Failed to create db");

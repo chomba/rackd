@@ -1,7 +1,4 @@
-pub mod wan;
-pub mod shared;
-use wan::cmd::WanCmd;
-
-pub enum NetCmd {
-    Wan(WanCmd)
-}
+pub mod model;
+pub mod query;
+pub mod views;
+pub use model::values::*;
